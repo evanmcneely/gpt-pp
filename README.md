@@ -1,52 +1,60 @@
 # GPT Engineer
-**Specify what you want it to build, the AI asks for clarification, and then builds it.**
 
-GPT Engineer is made to be easy to adapt, extend, and make your agent learn how you want your code to look. It generates an entire codebase based on a prompt. 
+Adapted from [AntonOsika/gpt/engineer](https://github.com/AntonOsika/gpt-engineer) with a focus on working with existing, large codebases
 
+**Goal:**
+_Specify what you want to do and the place to do it, the AI asks for clarification, then makes the changes, and waits for feedback before continuing._
 
-## Project philosophy
-- Simple to get value
-- Flexible and easy to add new own "AI steps". See `steps.py`.
-- Incrementally build towards a user experience of:
-  1. high level prompting
-  2. giving feedback to the AI that it will remember over time
-- Fast handovers back and forth between AI and human
-- Simplicity, all computation is "resumable" and persisted to the filesystem
+## To Do
 
+- [ ] Adapt project to use langchain, mimicing origional functionality
+  - chains
+  - memory
+- [ ] Implement step to source files that need to be referenced
+- [ ] Implement file manager, need to update, delete and create files
+
+## Ideal steps
+
+1. Enter what you want the AI to do with a seed file of roughly where to do it
+2. Using the seed file, retrieve all the file imports
+   - this can go multiple levels deep, start with just 1
+3. Ask the model for any clarifications, let the user clarify (existing)
+4. The model will now generate code. Write to the file system.
+   - create new files
+   - update existing files (to keep output minimal) only ask for the diff and update the files ?? [GitHub - google/diff-match-patch: Diff Match Patch is a high-performance library in multiple languages that manipulates plain text.](https://github.com/google/diff-match-patch)
+   - delete files
+   - make a commit for this iteration
+   - Keep files in program memory
+5. Pass back to the user for feedback
+   - user provides feedback, repeat steps 2 - 4
+
+_Someday maybe_
+
+- Find test files for the relevant changes
+- Write/update test files for the changes
+- Run tests and repeat 4 - 6 until tests pass
+
+  - limit the number of retries before prompting the user
 
 ## Usage
 
 **Install**:
 
 - `pip install -r requirements.txt`
-- `export OPENAI_API_KEY=[your api key]`
 
 **Run**:
-- Create a new empty folder with a `main_prompt` file (or copy the example folder `cp example -r my-new-project`)
-- Fill in the `main_prompt` in your new folder
-- run `python main.py my-new-project`
+
+- Add `OPENAI_API_KEY` to `.env`
+- run `python main.py -f ../file/paths/`
 
 **Results**:
-- Check the generated files in my-new-project/workspace_clarified
 
-### Limitations
-Implementing additional chain of thought prompting, e.g. [Reflexion](https://github.com/noahshinn024/reflexion), should be able to make it more reliable and not miss requested functionality in the main prompt.
+- Check the files system for changes
 
-Contributors welcome! If you are unsure what to add, check out the ideas listed in the Projects part of the github repo.
+## Limitations
 
+TODO
 
 ## Features
-You can specify the "identity" of the AI agent by editing the files in the `identity` folder.
-
-Editing the identity, and evolving the main_prompt, is currently how you make the agent remember things between projects.
 
 Each step in steps.py will have its communication history with GPT4 stored in the logs folder, and can be rerun with scripts/rerun_edited_message_logs.py.
-
-
-## Demo
-
-
-
-https://github.com/AntonOsika/gpt-engineer/assets/4467025/6e362e45-4a94-4b0d-973d-393a31d92d9b
-
-
