@@ -1,5 +1,5 @@
-from ..dbs import DBs
-from ..utils import FileManager
+from ..FileManager import FileManager
+from ..db import DBs
 
 
 def run_clarified(dbs: DBs, file_manager: FileManager):

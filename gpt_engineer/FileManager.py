@@ -1,6 +1,6 @@
 from typing import Dict
 from functools import total_ordering
-from FileWrapper import FileWrapper
+from .FileWrapper import FileWrapper
 
 
 @total_ordering

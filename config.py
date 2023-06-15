@@ -4,8 +4,9 @@ import pathlib
 from dotenv import load_dotenv
 from decouple import config
 
-from db import DBs, DB
-from utils import validate_directory, validate_file_path, FileManager
+from gpt_engineer.db import DBs, DB
+from gpt_engineer.utils import validate_directory, validate_file_path
+from gpt_engineer.FileManager import FileManager
 
 load_dotenv()
 

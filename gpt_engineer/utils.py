@@ -2,9 +2,6 @@ import re
 from typing import List, Tuple
 import os
 
-from FileWrapper import FileWrapper
-from FileManager import FileManager
-
 
 def _codeblock_search(chat: str) -> re.Match:
     regex = r"```(.*?)```"
@@ -24,10 +21,12 @@ def parse_chat(chat) -> List[Tuple[str, str]]:
     return files
 
 
-def validate_directory(path):
+def validate_directory(path: str):
     if not os.path.exists(path):
         raise ValueError("Project path is required")
 
 
-def validate_file_path(path):
+def validate_file_path(path: str or None) -> bool:
+    if path is None:
+        return False
     return os.path.exists(path)

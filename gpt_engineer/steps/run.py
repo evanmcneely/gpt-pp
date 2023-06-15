@@ -1,5 +1,5 @@
-from ..utils import FileManager
-from ..dbs import DBs
+from ..FileManager import FileManager
+from ..db import DBs
 
 
 def run(dbs: DBs, file_manager: FileManager):

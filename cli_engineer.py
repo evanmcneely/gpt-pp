@@ -1,4 +1,5 @@
 import json
+from typing import Callable
 import typer
 
 from gpt_engineer.steps import STEPS
@@ -9,7 +10,7 @@ from config import init_app
 app = typer.Typer()
 
 
-def _save_logs(db: DB, step: function, messages: list):
+def _save_logs(db: DB, step: Callable, messages: list):
     db[step.__name__] = json.dumps(messages)
 
 
@@ -29,10 +30,10 @@ def setup(
 ):
     dbs, file_manager = init_app(project_path, seed_file_path, run_prefix)
 
-    while True:
-        for step in STEPS:
-            messages = step(file_manager, dbs)
-            _save_logs(dbs.logs, step, messages)
+    # while True:
+    for step in STEPS:
+        messages = step(file_manager, dbs)
+        _save_logs(dbs.logs, step, messages)
 
 
 if __name__ == "__main__":
