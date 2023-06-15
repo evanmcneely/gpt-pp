@@ -1,9 +1,9 @@
 import json
 import typer
 
-from steps import STEPS
+from gpt_engineer.steps import STEPS
+from gpt_engineer.db import DB
 from config import init_app
-from db import DB
 
 
 app = typer.Typer()
