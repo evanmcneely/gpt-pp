@@ -44,6 +44,12 @@ class FileManager:
 
         return "\n\n".join(files_content)
 
+    def add_file(self, path: str) -> None:
+        """Adds a new file to the FileManager's dictionary of files."""
+        file = FileWrapper.from_path(path, self.project_path)
+        if file:
+            self.files[path] = file
+
     def close_all_files(self) -> None:
         """Closes all open files."""
         for _, file in self.files.items():

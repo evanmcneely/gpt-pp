@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 import os
 from pathlib import Path
@@ -14,15 +13,12 @@ class DB:
             return f.read()
 
     def __setitem__(self, key, val):
-        with open(self.path / key, 'w') as f:
+        with open(self.path / key, "w") as f:
             f.write(val)
 
 
 # dataclass for all dbs:
 @dataclass
 class DBs:
-    memory: DB
     logs: DB
-    identity: DB
-    input: DB
-    workspace: DB
+    preferences: DB
