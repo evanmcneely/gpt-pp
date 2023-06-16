@@ -1,8 +1,3 @@
-import re
-from typing import List, Tuple
-import os
-
-
 def _codeblock_search(chat: str) -> re.Match:
     regex = r"```(.*?)```"
     return re.finditer(regex, chat, re.DOTALL)
@@ -19,14 +14,3 @@ def parse_chat(chat) -> List[Tuple[str, str]]:
         files.append((method, path, code))
 
     return files
-
-
-def validate_directory(path: str):
-    if not os.path.exists(path):
-        raise ValueError("Project path is required")
-
-
-def validate_file_path(path: str or None) -> bool:
-    if path is None:
-        return False
-    return os.path.exists(path)

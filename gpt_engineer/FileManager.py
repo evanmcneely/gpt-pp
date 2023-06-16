@@ -1,16 +1,27 @@
-from typing import Dict
+import os
+from typing import Dict, Optional
 from functools import total_ordering
-from .FileWrapper import FileWrapper
+from .WrappedFile import WrappedFile
 
 
 @total_ordering
 class FileManager:
     def __init__(self, project_path: str):
-        self.files: Dict[str, FileWrapper] = {}
+        self.files: Dict[str, WrappedFile] = {}
         self.project_path = project_path
 
-    def get_file(self, path: str) -> FileWrapper:
-        """Returns the FileWrapper object corresponding to the given file path."""
+    @staticmethod
+    def resolve_path(
+        project_path: str,
+        path: str,
+    ) -> str:
+        return os.path.join(os.getcwd(), project_path, path)
+
+    def does_file_exist(cls, self, path: str) -> bool:
+        return os.path.exists(cls.resolve_path(self.project_path, path))
+
+    def get_file(self, path: str) -> WrappedFile:
+        """Returns the WrappedFile object corresponding to the given file path."""
         if path in self.files:
             return self.files[path]
         else:
@@ -18,7 +29,7 @@ class FileManager:
 
     def create(self, path: str, content: str) -> None:
         """Creates a new file with the given path and content."""
-        file = FileWrapper.from_path(path, self.project_path)
+        file = WrappedFile.from_path(path, self.project_path)
         if file:
             file.write_file(content)
             self.files[path] = file
@@ -28,6 +39,10 @@ class FileManager:
         file = self.get_file(path)
         if file:
             file.update_file(content, start)
+
+    # TODO: add - add code to a file
+
+    # TODO: remove - remove code from a file between two lines
 
     def delete(self, path: str) -> None:
         """Deletes a file from the FileManager's dictionary of files and removes it from disk."""
@@ -44,11 +59,27 @@ class FileManager:
 
         return "\n\n".join(files_content)
 
-    def add_file(self, path: str) -> None:
+    def add_file(cls, self, path: str = None, seed: bool = False) -> None:
         """Adds a new file to the FileManager's dictionary of files."""
-        file = FileWrapper.from_path(path, self.project_path)
+        if seed:
+            self.seed_file_path = path
+
+        if path is None:
+            return
+
+        exists = cls.does_file_exist(path)
+        if not exists:
+            self.seed_file_path = None
+            return
+
+        file = WrappedFile.from_path(path, self.project_path)
         if file:
             self.files[path] = file
+
+    def get_seed_file_content(self) -> Optional[str]:
+        """Returns the content of the seed file."""
+        if self.seed_file_path:
+            return self.get_file(self.seed_file_path).get_file_content()
 
     def close_all_files(self) -> None:
         """Closes all open files."""

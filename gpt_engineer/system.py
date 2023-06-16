@@ -19,6 +19,6 @@ class DB:
 
 # dataclass for all dbs:
 @dataclass
-class DBs:
+class System:
     logs: DB
     preferences: DB

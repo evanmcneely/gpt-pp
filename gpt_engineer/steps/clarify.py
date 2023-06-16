@@ -1,8 +1,8 @@
 from ..FileManager import FileManager
-from ..db import DBs
+from ..system import System
 
 
-def clarify(dbs: DBs, file_manager: FileManager):
+def clarify(system: System, file_manager: FileManager):
     """Ask the user if they want to clarify anything and save the results to the workspace"""
     # get input
 

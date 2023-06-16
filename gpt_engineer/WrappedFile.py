@@ -4,7 +4,7 @@ import os
 from typing import Optional
 
 
-class FileWrapper:
+class WrappedFile:
     """A wrapper for a file object that provides utility methods for working with files."""
 
     def __init__(self, file: io.TextIOWrapper, path: str, project_path: str):
@@ -13,8 +13,8 @@ class FileWrapper:
         self.file = file
 
     @classmethod
-    def from_path(self, cls, path: str, project_path: str) -> Optional["FileWrapper"]:
-        """Returns a FileWrapper object for the file at the given path."""
+    def from_path(cls, path: str, project_path: str) -> Optional["WrappedFile"]:
+        """Returns a WrappedFile object for the file at the given path."""
         wrapper = None
         full_path = cls._get_relative_path(path, project_path)
         file = cls._open_file(full_path)
@@ -24,13 +24,6 @@ class FileWrapper:
         return wrapper
 
     def get_file_content(self) -> str:
-        """Returns the content of the file as a string, with the file path as a header."""
-        file_string = f"-- {self.path}\n"
-        file_string += self.file.read()
-        self._reset_file()
-        return file_string
-
-    def get_file_content_with_line_numbers(self) -> str:
         """Returns the content of the file as a string with line numbers, with the file path as a header."""
         lines = self.file.readlines()
         file_string = f"-- {self.path}\n"
