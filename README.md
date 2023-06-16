@@ -15,7 +15,16 @@ _Specify what you want to do and the place to do it, the AI asks for clarificati
 
 - Add `OPENAI_API_KEY` to `.env`
 - Add any other environment variables to serve as overrides to the default configuration (see `config.py`)
-- run `python cli_engineer.py`
+- run `python cli_engineer.py` and follow the prompts
+  - `--i` to ignore `/workspace` defaults
+  - `--r` to add a prefix to the `/logs` directory for keeping multiple logs
+- view logs in the `/logs` directory
+
+## Custmomization
+
+Add your own customized instructions in a `/preferences` directory. Add files by programming language name (ex: `javascript`, `python`, etc.) that will be used by the model to followyour best practices in the language. Create a file named `engineering` for general engineering best practices.
+
+To avoid entering the same instructions multiple times, create a `/workspace` directory with files `prompt`, `project` and `files` that the program will use by default to get things going.
 
 ## Philosophy
 
@@ -36,7 +45,7 @@ _Specify what you want to do and the place to do it, the AI asks for clarificati
    - create new files
    - delete files
    - update files
-6. Manage conversation memory - summarize the conversation
+6. Manage conversation memory - summarize the conversation and save thoughts about the users engineering practices for future reference
 7. Pass back to the user for feedback
    - user provides feedback, repeat steps 4 - 7
 
