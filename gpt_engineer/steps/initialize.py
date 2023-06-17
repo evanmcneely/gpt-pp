@@ -1,19 +1,35 @@
 import os
-import pathlib
 
-from .system import System, DB
-from .FileManager import FileManager
-
-
-def _validate_directory(path: str):
-    if not os.path.exists(path):
-        raise ValueError("Project path is required")
+from ..system import System, DB
+from ..FileManager import FileManager
 
 
-def _validate_file_path(path: list[str]):
-    for p in path:
-        if not os.path.exists(p):
-            raise ValueError("File path is required")
+def _resolve_path(path: str) -> str:
+    return os.path.join(os.getcwd(), path)
+
+
+def _validate_directory(path: str) -> bool:
+    resolved_path = _resolve_path(path)
+    if os.path.isfile(resolved_path):
+        raise ValueError(f"{path} is a file, not a directory")
+    if not os.path.isdir(resolved_path):
+        os.makedirs(resolved_path)
+        return False
+    return True
+
+
+def _validate_file_path(paths: list[str]):
+    if not paths:
+        raise ValueError("No file paths provided")
+    for path in paths:
+        resolved_path = _resolve_path(path)
+        if os.path.isdir(resolved_path):
+            raise ValueError(f"{path} is a directory, not a file")
+        _, extension = os.path.splitext(path)
+        if extension.lower() in [".jpg", ".jpeg", ".png", ".svg"]:
+            continue
+        if not os.path.isfile(resolved_path):
+            raise ValueError(f"{path} does not exist or is not a file")
 
 
 def _sanitize_line(input: str) -> str:
@@ -21,11 +37,11 @@ def _sanitize_line(input: str) -> str:
 
 
 def _sanitize_input(input: str) -> list[str]:
-    return [_sanitize_line(x) for x in input.split("\n")]
+    return [_sanitize_line(x) for x in input.split(" ")]
 
 
 def _get_project_from_workspace(system: System) -> str:
-    return system.workspace["projects"]
+    return system.workspace["project"]
 
 
 def _get_file_paths_from_workspace(system: System) -> list[str]:
@@ -37,30 +53,33 @@ def _add_files_to_project(file_manager: FileManager, files: list[str]):
         file_manager.add_file(file, seed=True)
 
 
-def inititialize(ignore_existing: bool, run_prefix: str):
+def _get_project_input() -> str:
+    project = input(
+        "Enter the relative path to the project directory you would like to work in\n"
+    )
+    return _sanitize_line(project)
+
+
+def _get_file_paths_input() -> list[str]:
+    file_paths = input(
+        "Enter the paths to the files in project you would like to work with (new line for each file path)\n"
+    )
+    return _sanitize_input(file_paths)
+
+
+def initialize(ignore_existing: bool, run_prefix: str):
     system = System(
-        logs=DB(pathlib.Path(__file__).parent / (run_prefix + "logs")),
-        preferences=DB(pathlib.Path(__file__).parent / "preferences"),
-        workspace=DB(pathlib.Path(__file__).parent / "workspace"),
+        logs=DB(_resolve_path(run_prefix + "logs")),
+        preferences=DB(_resolve_path("preferences")),
+        workspace=DB(_resolve_path("workspace")),
     )
 
-    project = _get_project_from_workspace(system)
-    files = _get_file_paths_from_workspace(system)
+    project: str = _get_project_input()
+    files: list[str] = _get_file_paths_input()
 
-    if len(project) == 0 or ignore_existing:
-        project = print(
-            "Enter the relative path to the project directory you would like to work in"
-        )
-        project = _sanitize_input(project)[0]
-
-    if len(files) == 0 or ignore_existing:
-        files = print(
-            "Enter the paths to the files in project you would like to work with (new line for each file path)"
-        )
-        files = _sanitize_input(files)
-
-    _validate_directory(project)
-    _validate_file_path(files)
+    # TODO:
+    # input validation
+    # get projects/files from workspace
 
     file_manager = FileManager(project)
     _add_files_to_project(file_manager, files)

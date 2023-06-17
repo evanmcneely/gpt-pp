@@ -20,12 +20,14 @@ STEPS = []
 def setup(
     ignore_existing: bool = typer.Option(
         False,
-        "--i",
-        help="ignore existing project and file paths",
+        "-i",
+        "--ignore",
+        help="ignore existing project and file paths in the workspace directory if they exist",
     ),
     run_prefix: str = typer.Option(
         "",
-        "--p",
+        "-r",
+        "--run-prefix",
         help="run prefix, if you want to run multiple variants of the same project and later compare them",
     ),
 ):
@@ -36,8 +38,10 @@ def setup(
         for step in STEPS:
             messages = step(file_manager, system)
             _save_to_logs(system, step, messages)
+
     except Exception as e:
-        print(f"\033[31mError: {str(e)}\033[0m")
+        message = typer.style(f"Error: {str(e)}", fg=typer.colors.RED)
+        typer.echo(message)
 
 
 if __name__ == "__main__":

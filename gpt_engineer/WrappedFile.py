@@ -16,7 +16,7 @@ class WrappedFile:
     def from_path(cls, path: str, project_path: str) -> Optional["WrappedFile"]:
         """Returns a WrappedFile object for the file at the given path."""
         wrapper = None
-        full_path = cls._get_relative_path(path, project_path)
+        full_path = cls._resolve_path(path, project_path)
         file = cls._open_file(full_path)
         if file:
             wrapper = cls(file=file, path=path, project_path=project_path)
@@ -35,10 +35,9 @@ class WrappedFile:
         self._reset_file()
         return file_string
 
-    def _get_relative_path(path: str = None, project_path: str = None) -> pathlib.Path:
+    def _resolve_path(path: str = None, project_path: str = None) -> pathlib.Path:
         """Returns the full path to the file based on the project path and file path."""
-        script_path = pathlib.Path(__file__).parent.absolute()
-        return pathlib.Path(script_path, project_path, path)
+        return os.path.join(os.getcwd(), project_path, path)
 
     def write_file(self, content: str) -> None:
         """Writes the content to the file"""
@@ -53,17 +52,14 @@ class WrappedFile:
 
     def delete_file(self) -> None:
         """Deletes the file at the given path."""
-        file_path = self._get_relative_path(
-            path=self.path, project_path=self.project_path
-        )
+        file_path = self._resolve_path(path=self.path, project_path=self.project_path)
         self.close_file()
         os.remove(file_path)
 
-    def _open_file(self, path) -> Optional[io.TextIOWrapper]:
+    def _open_file(path) -> Optional[io.TextIOWrapper]:
         """Opens the file at the given path."""
         try:
             with open(path, "r+") as file:
-                self.file = file
                 return file
         except PermissionError:
             print(

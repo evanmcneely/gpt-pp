@@ -22,3 +22,4 @@ class DB:
 class System:
     logs: DB
     preferences: DB
+    workspace: DB

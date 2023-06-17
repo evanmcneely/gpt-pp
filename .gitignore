@@ -1,6 +1,5 @@
 archive
-logs/**/*
-preferences/**/*
+*logs/**/*
 
 # OSX
 .DS_STORE

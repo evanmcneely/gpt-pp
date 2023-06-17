@@ -55,22 +55,16 @@ class FileManager:
         """Returns a string with the content of all files, each with line numbers, sorted by file path."""
         files_content = []
         for _, file in sorted(self.files.items()):
-            files_content.append(file.get_file_content_with_line_numbers())
+            files_content.append(file.get_file_content())
 
         return "\n\n".join(files_content)
 
-    def add_file(cls, self, path: str = None, seed: bool = False) -> None:
+    def add_file(self, path: str = None, seed: bool = False) -> None:
         """Adds a new file to the FileManager's dictionary of files."""
         if seed:
             self.seed_file_path = path
 
-        if path is None:
-            return
-
-        exists = cls.does_file_exist(path)
-        if not exists:
-            self.seed_file_path = None
-            return
+        # TODO: input validation
 
         file = WrappedFile.from_path(path, self.project_path)
         if file:

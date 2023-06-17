@@ -63,7 +63,7 @@ TODO
 
 ## To Do
 
-- [ ] (in progress) initialization and validation of the project and file paths
+- [ ] initialization and validation of the project and file paths
 - [ ] Retrieve relevant files from the file system
 - [ ] Clarification step
 - [ ] Coding step
