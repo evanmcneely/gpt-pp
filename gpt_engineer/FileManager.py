@@ -1,84 +1,87 @@
 import os
 from typing import Dict, Optional
 from functools import total_ordering
+
 from .WrappedFile import WrappedFile
+from .utils import resolve_path, validate_directory_path
 
 
 @total_ordering
 class FileManager:
-    def __init__(self, project_path: str):
-        self.files: Dict[str, WrappedFile] = {}
+    """Manages all files in the project."""
+
+    files: Dict[str, WrappedFile]
+    project_path: str  # path to the project
+    seed_file_path: str  # path to the "seed file" within the project
+
+    def __init__(self, project_path: str, seed_file_path: str):
+        self.files = {}
         self.project_path = project_path
+        self.seed_file_path = seed_file_path
 
-    @staticmethod
-    def resolve_path(
-        project_path: str,
-        path: str,
-    ) -> str:
-        return os.path.join(os.getcwd(), project_path, path)
+    @classmethod
+    def from_seed_file(
+        cls, project_path: str, seed_file_path: str
+    ) -> Optional["FileManager"]:
+        """Returns a FileManager object with the seed file included."""
+        abs_path = resolve_path(project_path)
+        validate_directory_path(abs_path)
 
-    def does_file_exist(cls, self, path: str) -> bool:
-        return os.path.exists(cls.resolve_path(self.project_path, path))
+        file = WrappedFile.from_path(seed_file_path, project_path)
+        if file:
+            manager = cls(project_path, seed_file_path)
+            manager.files[file.path] = file
 
-    def get_file(self, path: str) -> WrappedFile:
+    def get_file(self, path: str) -> Optional[WrappedFile]:
         """Returns the WrappedFile object corresponding to the given file path."""
         if path in self.files:
             return self.files[path]
         else:
             return None
 
-    def create(self, path: str, content: str) -> None:
+    def create(self, path: str, content: str):
         """Creates a new file with the given path and content."""
+        if path in self.files or os.path.exists:
+            raise ValueError("File already exists")
+
         file = WrappedFile.from_path(path, self.project_path)
         if file:
-            file.write_file(content)
+            file.write(content)
             self.files[path] = file
 
-    def update(self, path: str, content: str, start: int) -> None:
+    def update(self, path: str, content: str, start: int):
         """Updates the content of an existing file with the given content, starting at the given offset."""
         file = self.get_file(path)
         if file:
-            file.update_file(content, start)
+            file.update(content, start)
 
-    # TODO: add - add code to a file
-
-    # TODO: remove - remove code from a file between two lines
-
-    def delete(self, path: str) -> None:
+    def delete(self, path: str):
         """Deletes a file from the FileManager's dictionary of files and removes it from disk."""
         file = self.get_file(path)
         if file:
-            file.delete_file()
+            file.delete()
             self.files.pop(path, None)
 
-    def get_all_files_content(self) -> str:
+    def get_content(self, path: str) -> str:
+        """Returns the content of the file at the given path."""
+        file = self.get_file(path)
+        if file:
+            return file.read_with_line_numbers()
+
+    def get_all_file_content(self) -> str:
         """Returns a string with the content of all files, each with line numbers, sorted by file path."""
         files_content = []
         for _, file in sorted(self.files.items()):
-            files_content.append(file.get_file_content())
+            files_content.append(file.read_with_line_numbers())
 
         return "\n\n".join(files_content)
 
-    def add_file(self, path: str = None, seed: bool = False) -> None:
+    def add_file(self, path: str) -> Optional[WrappedFile]:
         """Adds a new file to the FileManager's dictionary of files."""
-        if seed:
-            self.seed_file_path = path
-
-        # TODO: input validation
-
         file = WrappedFile.from_path(path, self.project_path)
         if file:
             self.files[path] = file
-
-    def get_seed_file_content(self) -> Optional[str]:
-        """Returns the content of the seed file."""
-        if self.seed_file_path:
-            return self.get_file(self.seed_file_path).get_file_content()
-
-    def close_all_files(self) -> None:
-        """Closes all open files."""
-        for _, file in self.files.items():
-            file.close_file()
+            return file
 
     def __eq__(self, other):
         if isinstance(other, FileManager):

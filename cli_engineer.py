@@ -4,6 +4,7 @@ import typer
 
 from gpt_engineer.steps import initialize
 from gpt_engineer.system import System
+from gpt_engineer.ui import UI
 
 
 app = typer.Typer()
@@ -40,8 +41,7 @@ def setup(
             _save_to_logs(system, step, messages)
 
     except Exception as e:
-        message = typer.style(f"Error: {str(e)}", fg=typer.colors.RED)
-        typer.echo(message)
+        UI.error(e.message)
 
 
 if __name__ == "__main__":
