@@ -1,14 +1,9 @@
-import os
 from typing import Optional
 
 from ..system import System, DB
 from ..FileManager import FileManager
 from ..ui import UI
 from ..utils import resolve_path, validate_file_path, validate_directory_path
-
-
-def _resolve_path(path: str) -> str:
-    return os.path.join(os.getcwd(), path)
 
 
 def _sanitize_input(input: str) -> str:
@@ -88,9 +83,9 @@ def _get_file_input(project: str) -> str:
 
 def initialize(ignore_existing: bool, run_prefix: str):
     system = System(
-        logs=DB(_resolve_path(run_prefix + "logs")),
-        preferences=DB(_resolve_path("preferences")),
-        workspace=DB(_resolve_path("workspace")),
+        logs=DB(resolve_path(run_prefix + "logs")),
+        preferences=DB(resolve_path("preferences")),
+        workspace=DB(resolve_path("workspace")),
     )
 
     project, created = _get_project_from_workspace(system)
@@ -102,8 +97,6 @@ def initialize(ignore_existing: bool, run_prefix: str):
         file: str = _get_file_from_workspace(system, project)
         if not file or ignore_existing:
             file = _get_file_input(project)
-
-    print(project, created, file)
 
     file_manager = FileManager(project)
     if file:
