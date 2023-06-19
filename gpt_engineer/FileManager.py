@@ -3,7 +3,7 @@ from typing import Dict, Optional
 from functools import total_ordering
 
 from .WrappedFile import WrappedFile
-from .utils import resolve_path, validate_directory_path
+from .utils import resolve_path, validate_directory_path, validate_file_path
 
 
 @total_ordering
@@ -14,7 +14,7 @@ class FileManager:
     project_path: str  # path to the project
     seed_file_path: str  # path to the "seed file" within the project
 
-    def __init__(self, project_path: str, seed_file_path: str):
+    def __init__(self, project_path: str, seed_file_path: str = None):
         self.files = {}
         self.project_path = project_path
         self.seed_file_path = seed_file_path
@@ -43,6 +43,8 @@ class FileManager:
         """Creates a new file with the given path and content."""
         if path in self.files or os.path.exists:
             raise ValueError("File already exists")
+
+        # TODO: validate file path
 
         file = WrappedFile.from_path(path, self.project_path)
         if file:
@@ -76,8 +78,12 @@ class FileManager:
 
         return "\n\n".join(files_content)
 
-    def add_file(self, path: str) -> Optional[WrappedFile]:
+    def add(self, path: str, seed: bool = False) -> Optional[WrappedFile]:
         """Adds a new file to the FileManager's dictionary of files."""
+        # TODO: validate file path
+
+        if seed:
+            self.seed_file_path = path
         file = WrappedFile.from_path(path, self.project_path)
         if file:
             self.files[path] = file

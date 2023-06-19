@@ -35,4 +35,4 @@ def retrieve_files(_: System, file_manager: FileManager):
     print(file_paths)
 
     for path in file_paths:
-        file_manager.add_file(path)
+        file_manager.add(path)
