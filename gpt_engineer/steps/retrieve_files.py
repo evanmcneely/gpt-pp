@@ -4,9 +4,10 @@ from ..FileManager import FileManager
 from ..system import System
 from ..chains import get_imported_file_paths
 from ..ui import UI
+from ..memory import MemoryManager
 
 
-def retrieve_files(file_manager: FileManager, _: System):
+def retrieve_files(file_manager: FileManager, _system: System, _memory: MemoryManager):
     if not file_manager.seed_file_path:
         return None
 
@@ -17,6 +18,7 @@ def retrieve_files(file_manager: FileManager, _: System):
             file_manager.add(path)
             UI.success(path)
         except:
-            UI.fail(path)
+            pass
+            # UI.fail(path)
 
     return file_paths

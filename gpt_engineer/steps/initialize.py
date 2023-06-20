@@ -1,9 +1,12 @@
 from typing import Optional
 
+from gpt_engineer.memory import MemoryManager
+
 from ..system import System, DB
 from ..FileManager import FileManager
 from ..ui import UI
 from ..utils import resolve_path, validate_file_path, validate_directory_path
+from ..memory import MemoryManager
 
 
 def _sanitize_input(input: str) -> str:
@@ -102,4 +105,6 @@ def initialize(ignore_existing: bool, run_prefix: str):
     if file:
         file_manager.add(file, seed=True)
 
-    return system, file_manager
+    memory = MemoryManager("chat_history")
+
+    return system, file_manager, memory
