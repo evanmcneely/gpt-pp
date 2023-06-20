@@ -2,7 +2,7 @@ import json
 from typing import Callable
 import typer
 
-from gpt_engineer.steps import initialize
+from gpt_engineer.steps import initialize, retrieve_files
 from gpt_engineer.system import System
 from gpt_engineer.ui import UI
 
@@ -14,7 +14,7 @@ def _save_to_logs(system: System, step: Callable, messages: list):
     system.logs[step.__name__] = json.dumps(messages)
 
 
-STEPS = []
+STEPS = [retrieve_files]
 
 
 @app.command()
@@ -38,10 +38,11 @@ def setup(
         # while True:
         for step in STEPS:
             messages = step(file_manager, system)
-            _save_to_logs(system, step, messages)
+            if messages:
+                _save_to_logs(system, step, messages)
 
     except Exception as e:
-        UI.error(e.message)
+        UI.error(e)
 
 
 if __name__ == "__main__":

@@ -1,16 +1,8 @@
-import logging
-
-from dotenv import load_dotenv
 from decouple import config
 
 
-load_dotenv()
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
+OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
+ANTHROPIC_API_KEY = config("ANTHROPIC_API_KEY", default="")
 
 
 class AnthropicAIModels:

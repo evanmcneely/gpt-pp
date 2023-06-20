@@ -1,21 +1,16 @@
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.chat_models import ChatOpenAI, ChatAnthropic
 
-from config import OpenAIModels, AnthropicAIModels
+from config import OpenAIModels, AnthropicAIModels, OPENAI_API_KEY, ANTHROPIC_API_KEY
+
+def _get_openai(model: str):
+    return ChatOpenAI(openai_api_key=OPENAI_API_KEY, temperature=0, model_name=model)
 
 
-def _get_callbacks():
-    return [StreamingStdOutCallbackHandler()]
+def _get_anthropic(model: str):
+    return ChatAnthropic(anthropicai_api_key=ANTHROPIC_API_KEY, temperature=0, model=model)
 
 
-def _get_openai(model):
-    return ChatOpenAI(stream=True, temperature=0, model_name=model, callbacks=_get_callbacks())
-
-def _get_anthropic(model):
-    return ChatAnthropic(stream=True, temperature=0, model=model, callbacks=_get_callbacks())
-
-
-def get_llm(model):
+def get_llm(model: str):
     match model:
         case OpenAIModels.GPT_3_5_TURBO:
             return _get_openai(model)

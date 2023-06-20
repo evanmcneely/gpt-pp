@@ -15,3 +15,6 @@ class UI:
     def fail(message: str):
         prefix = typer.style("✘ ", fg=typer.colors.RED, bold=True)
         typer.echo(prefix + message)
+
+    def message(message: str):
+        typer.echo(message)

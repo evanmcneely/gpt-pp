@@ -12,7 +12,7 @@ class FileManager:
 
     files: Dict[str, WrappedFile]
     project_path: str  # path to the project
-    seed_file_path: str  # path to the "seed file" within the project
+    seed_file_path: str = None  # path to the "seed file" within the project
 
     def __init__(self, project_path: str, seed_file_path: str = None):
         self.files = {}
@@ -88,6 +88,15 @@ class FileManager:
         if file:
             self.files[path] = file
             return file
+
+    def number_of_files(self) -> int:
+        return len(self.files)
+
+    def get_seed_file_content(self) -> str:
+        return self.get_content(self.seed_file_path)
+
+    def get_seed_file(self) -> Optional[WrappedFile]:
+        return self.get_file(self.seed_file_path)
 
     def __eq__(self, other):
         if isinstance(other, FileManager):

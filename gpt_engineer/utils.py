@@ -32,6 +32,7 @@ def resolve_path(*args: str) -> str:
     return os.path.abspath(os.path.join(os.getcwd(), *args))
 
 
+# not an exhaustive list, just because it isn't here doesn't mean it's not allowed
 DISALLOWED_FILE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg"]
 
 

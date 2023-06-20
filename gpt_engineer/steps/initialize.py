@@ -100,6 +100,6 @@ def initialize(ignore_existing: bool, run_prefix: str):
 
     file_manager = FileManager(project)
     if file:
-        file_manager.add(file)
+        file_manager.add(file, seed=True)
 
     return system, file_manager

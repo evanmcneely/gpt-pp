@@ -1,38 +1,22 @@
-import json
 from langchain import PromptTemplate
 
-from ..llm import get_llm
-from config import Models
 from ..FileManager import FileManager
 from ..system import System
+from ..chains import get_imported_file_paths
+from ..ui import UI
 
 
-template = """
-Determine the paths to all the files imported into the file below from the project root directory. Return the result as a python list of strings. The result must be a valid JSON BLOB.
+def retrieve_files(file_manager: FileManager, _: System):
+    if not file_manager.seed_file_path:
+        return None
 
-{file}
-"""
-
-prompt = PromptTemplate(
-    input_variables=["file"],
-    template=template,
-)
-
-
-def _get_file_paths_from_seed_file_path(seed_file: str):
-    llm = get_llm(Models.INTERPRETATION_MODEL)
-    result = llm.run(prompt.format(file=seed_file))
-    return json.loads(result)
-
-
-def retrieve_files(_: System, file_manager: FileManager):
-    seed_file_path = FileManager.seed_file_path
-    if not seed_file_path:
-        return
-
-    file_paths = _get_file_paths_from_seed_file_path(seed_file_path)
-
-    print(file_paths)
+    file_paths = get_imported_file_paths(file_manager.get_seed_file_content())
 
     for path in file_paths:
-        file_manager.add(path)
+        try:
+            file_manager.add(path)
+            UI.success(path)
+        except:
+            UI.fail(path)
+
+    return file_paths
