@@ -4,13 +4,16 @@ import os
 def _change_permissions(path: str, permissions=0o777) -> None:
     try:
         os.chmod(path, permissions)
-    except OSError:
+    except OSError as e:
         # TODO: handle this properly
+        print(f"print OSError in utils _change_permissions: {e}")
+        raise
+    except Exception as e:
+        print(f"print exception in utils _change_permissions: {e}")
         raise
 
 
 def _path_exists(path: str) -> bool:
-    _change_permissions(path)
     return os.path.exists(path)
 
 

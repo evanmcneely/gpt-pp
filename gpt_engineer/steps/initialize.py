@@ -8,6 +8,10 @@ from ..utils import resolve_path, validate_file_path, validate_directory_path
 
 
 def _sanitize_input(input: str) -> str:
+    if not input:
+        return None
+
+    # only using the first line
     return input.split("\n")[0].strip(" ")
 
 
@@ -24,9 +28,6 @@ def _get_project_from_workspace(system: System) -> Optional[str]:
     except Exception:
         pass
     # TODO: specific error messaging
-
-    if not project:
-        return None
 
     return _sanitize_input(project), created
 
@@ -58,9 +59,7 @@ def _get_project_input() -> str:
         project = _sanitize_input(project)
         path = resolve_path(project)
         try:
-            print("hello")
             created = validate_directory_path(path)
-            print(created)
             break
         except ValueError as e:
             UI.error(e)
@@ -90,7 +89,7 @@ def initialize(ignore_existing: bool, run_prefix: str):
         logs=DB(resolve_path(run_prefix + "logs")),
         preferences=DB(resolve_path("preferences")),
         workspace=DB(resolve_path("workspace")),
-        memory=MemoryManager("chat_history"),
+        memory=MemoryManager(),
     )
 
     project, created = _get_project_from_workspace(system)
