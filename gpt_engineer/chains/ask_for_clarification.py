@@ -13,23 +13,19 @@ def format_initial_prompt(prompt: str, file_content: str) -> str:
     """
 
 
-template = """
-Respond with a single question that you would need to ask to gain more clarity about how to follow the instructions. Provided is a history of your past interactions with the user. If there are no more clarifications required return the string "nothing left to clarify".
+prompt = """
+Respond with a single question that you would need to ask to gain more clarity about how to follow the instructions. If everything is clear, return the string "nothing left to clarify".
 
 Chat History: 
 {chat_history}
 human: {user_message}
-
-Question:
 """
 
 
-def ask_for_clarification(memory: ConversationBufferMemory, user_message: str):
+def ask_for_clarification(memory: str, user_message: str):
     chain = LLMChain(
         llm=get_llm(Models.CONVERSATION_MODEL),
-        prompt=PromptTemplate.from_template(template),
-        memory=memory,
+        prompt=PromptTemplate.from_template(prompt),
     )
 
-    question = chain.predict(user_message=user_message)
-    return question
+    return chain.predict(user_message=user_message, chat_history=memory)

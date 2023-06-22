@@ -7,7 +7,7 @@ def _get_openai(model: str, **kwargs):
 
 
 def _get_anthropic(model: str, **kwargs):
-    return ChatAnthropic(anthropicai_api_key=ANTHROPIC_API_KEY, temperature=0, model=model, **kwargs)
+    return ChatAnthropic(anthropic_api_key=ANTHROPIC_API_KEY, temperature=0, model=model, **kwargs)
 
 
 def get_llm(model: str, **kwargs):

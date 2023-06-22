@@ -1,6 +1,10 @@
-from dataclasses import dataclass
+from typing import Optional
 import os
+from dataclasses import dataclass
 from pathlib import Path
+
+from .MemoryManager import MemoryManager
+from .FileManager import FileManager
 
 
 class DB:
@@ -23,3 +27,5 @@ class System:
     logs: DB
     preferences: DB
     workspace: DB
+    memory: MemoryManager
+    file_manager: Optional[FileManager] = None

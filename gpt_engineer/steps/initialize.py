@@ -1,12 +1,10 @@
 from typing import Optional
 
-from gpt_engineer.memory import MemoryManager
-
 from ..system import System, DB
 from ..FileManager import FileManager
+from ..MemoryManager import MemoryManager
 from ..ui import UI
 from ..utils import resolve_path, validate_file_path, validate_directory_path
-from ..memory import MemoryManager
 
 
 def _sanitize_input(input: str) -> str:
@@ -60,10 +58,13 @@ def _get_project_input() -> str:
         project = _sanitize_input(project)
         path = resolve_path(project)
         try:
+            print("hello")
             created = validate_directory_path(path)
+            print(created)
             break
         except ValueError as e:
             UI.error(e)
+            pass
 
     return project, created
 
@@ -89,6 +90,7 @@ def initialize(ignore_existing: bool, run_prefix: str):
         logs=DB(resolve_path(run_prefix + "logs")),
         preferences=DB(resolve_path("preferences")),
         workspace=DB(resolve_path("workspace")),
+        memory=MemoryManager("chat_history"),
     )
 
     project, created = _get_project_from_workspace(system)
@@ -105,6 +107,6 @@ def initialize(ignore_existing: bool, run_prefix: str):
     if file:
         file_manager.add(file, seed=True)
 
-    memory = MemoryManager("chat_history")
+    system.file_manager = file_manager
 
-    return system, file_manager, memory
+    return system

@@ -1,2 +1,2 @@
-add a new endpoint
+add a new endpoint named hello that returns the string hello world
 
