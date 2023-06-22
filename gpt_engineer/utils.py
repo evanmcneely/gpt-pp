@@ -33,6 +33,14 @@ def resolve_path(*args: str) -> str:
     return os.path.abspath(os.path.join(os.getcwd(), *args))
 
 
+def sanitize_input(input: str) -> str:
+    if not input:
+        return None
+
+    # only using the first line
+    return input.split("\n")[0].strip(" ")
+
+
 # not an exhaustive list, just because it isn't here doesn't mean it's not allowed
 DISALLOWED_FILE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg"]
 
@@ -54,6 +62,7 @@ def validate_file_path(abs_path: str) -> None:
 
 def validate_directory_path(abs_path: str) -> bool:
     # TODO: specific error messaging
+    abs_path = sanitize_input(abs_path)
 
     created = False
     if not _path_exists(abs_path):

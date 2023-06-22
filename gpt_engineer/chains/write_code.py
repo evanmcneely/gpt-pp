@@ -79,6 +79,4 @@ def write_code(memory: str):
 
     result = chain.predict(chat_history=memory)
 
-    parsed = _parse_chat(result)
-    print("parsed", parsed)
-    return parsed
+    return _parse_chat(result)

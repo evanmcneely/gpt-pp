@@ -11,10 +11,10 @@ def write_code_to_files(system: System):
         try:
             path = file[0]
             code = file[1]
-            print(path, code)
             system.file_manager.update(path, code, 0)
-            UI.success(file[0])
+            UI.success(path)
         except:
+            UI.fail(path)
             pass
 
     return files

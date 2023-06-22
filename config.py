@@ -6,7 +6,8 @@ ANTHROPIC_API_KEY = config("ANTHROPIC_API_KEY", default="")
 
 
 class AnthropicAIModels:
-    CLAUDE = "claude-1.3"
+    CLAUDE_1_3_100k = "claude-1.3-100k"
+    CLAUDE_1_3 = "claude-1.3"
 
 
 class OpenAIModels:
@@ -21,4 +22,4 @@ class Models:
     INTERPRETATION_MODEL = config(
         "INTERPRETATION_MODEL", default=OpenAIModels.GPT_3_5_TURBO_16K
     )
-    CONVERSATION_MODEL = config("CONVERSE_MODEL", default=OpenAIModels.GPT_3_5_TURBO)
+    CONVERSATION_MODEL = config("CHAT_MODEL", default=OpenAIModels.GPT_3_5_TURBO)

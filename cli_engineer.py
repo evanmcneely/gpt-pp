@@ -46,7 +46,7 @@ def setup(
             provide_feedback(system)
 
     except Exception as e:
-        UI.error(e.message)
+        UI.error(e)
 
 
 if __name__ == "__main__":
