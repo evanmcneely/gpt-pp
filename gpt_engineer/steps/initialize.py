@@ -102,10 +102,8 @@ def initialize(ignore_existing: bool, run_prefix: str):
         if not file or ignore_existing:
             file = _get_file_input(project)
 
-    file_manager = FileManager(project)
+    system.file_manager = FileManager(project)
     if file:
-        file_manager.add(file, seed=True)
-
-    system.file_manager = file_manager
+        system.file_manager.add(file, seed=True)
 
     return system
