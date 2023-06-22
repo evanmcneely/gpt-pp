@@ -14,7 +14,6 @@ def _get_prompt_from_workspace(system: System) -> str:
     prompt = None
     try:
         prompt = system.workspace["prompt"]
-        print(prompt)
         if not prompt.strip():
             return None
     except Exception:

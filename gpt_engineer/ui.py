@@ -10,11 +10,11 @@ class UI:
         return input(message)
 
     def success(message: str):
-        prefix = typer.style("✔ ", fg=typer.colors.GREEN, bold=True)
+        prefix = typer.style("  ✔ ", fg=typer.colors.GREEN, bold=True)
         typer.echo(prefix + message)
 
     def fail(message: str):
-        prefix = typer.style("✘ ", fg=typer.colors.RED, bold=True)
+        prefix = typer.style("  ✘ ", fg=typer.colors.RED, bold=True)
         typer.echo(prefix + message)
 
     def message(message: str):

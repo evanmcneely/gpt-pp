@@ -1,4 +1,5 @@
-import os
+from halo import Halo
+
 from langchain import PromptTemplate, LLMChain
 from langchain.output_parsers import CommaSeparatedListOutputParser
 
@@ -12,6 +13,7 @@ Determine the paths to all the files imported into the file below from the proje
 """
 
 
+@Halo(text="Loading relative files", spinner="dots")
 def get_imported_file_paths(file: str):
     chain = LLMChain(
         llm=get_llm(Models.INTERPRETATION_MODEL),

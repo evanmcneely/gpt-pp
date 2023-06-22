@@ -1,3 +1,4 @@
+from halo import Halo
 import re
 from typing import List, Tuple
 from langchain import PromptTemplate, LLMChain
@@ -8,24 +9,23 @@ from ..llm import get_llm
 from config import Models
 
 template = """
-Write the code needed to implement the instructions and clarifications in the chat history below. Start by thinking about what the code should do what files you might need to create, update or delete. It is important to think before writing code. Then output the content of each file following the syntax below. Make sure that files contain all imports, types etc. The code should be fully functional. Make sure that code in different files are compatible with each other.
+Please now remember the steps:
 
-File syntax:
-Follow this syntax when writing the code. The first line, following the three ` is the action to take, either "create", "update" or "delete". Following the action is the path of the file from the projects root directory.
+Think step by step and reason yourself to the right decisions to make sure we get it right.
+First lay out the names of the core classes, functions, methods that will be necessary, As well as a quick comment on their purpose.
 
-example "create"
-```create file.py/ts/html
-[ADD YOUR CODE HERE]
+Then you will output the content of each file including ALL code.
+Each file must strictly follow a markdown code block format, where the following tokens must be replaced such that
+FILENAME is the lowercase file name including the file extension,
+LANG is the markup code block language for the code's language, and CODE is the code:
+
+FILENAME
+```LANG
+CODE
 ```
 
-example "update"
-```update file.py/ts/html
-[ADD YOUR CODE HERE]
-```
+Please note that the code should be fully functional. No placeholders.
 
-example "delete"
-```delete file.py/ts/html
-```
 
 Chat history:
 {chat_history}
@@ -35,7 +35,7 @@ Begin
 
 
 def _codeblock_search(chat: str) -> re.Match:
-    regex = r"```(.*?)```"
+    regex = r"(\S+)\n\s*```[^\n]*\n(.+?)```"
     return re.finditer(regex, chat, re.DOTALL)
 
 
@@ -44,14 +44,33 @@ def _parse_chat(chat) -> List[Tuple[str, str]]:
 
     files = []
     for match in matches:
-        lines = match.group(1).split("\n")
-        method, path = lines[0].split(" ")
-        code = "\n".join(lines[1:])
-        files.append((method, path, code))
+        # Strip the filename of any non-allowed characters and convert / to \
+        path = re.sub(r'[<>"|?*]', "", match.group(1))
 
+        # Remove leading and trailing brackets
+        path = re.sub(r"^\[(.*)\]$", r"\1", path)
+
+        # Remove leading and trailing backticks
+        path = re.sub(r"^`(.*)`$", r"\1", path)
+
+        # Remove trailing ]
+        path = re.sub(r"\]$", "", path)
+
+        # Get the code
+        code = match.group(2)
+
+        # Add the file to the list
+        files.append((path, code))
+
+    # Get all the text before the first ``` block
+    readme = chat.split("```")[0]
+    files.append(("README.md", readme))
+
+    # Return the files
     return files
 
 
+@Halo(text="Generating code", spinner="dots")
 def write_code(memory: str):
     chain = LLMChain(
         llm=get_llm(Models.CODE_MODEL),
@@ -59,5 +78,7 @@ def write_code(memory: str):
     )
 
     result = chain.predict(chat_history=memory)
-    print(result)
-    return _parse_chat(result)
+
+    parsed = _parse_chat(result)
+    print("parsed", parsed)
+    return parsed

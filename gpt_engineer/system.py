@@ -24,5 +24,6 @@ class DB:
 @dataclass
 class System:
     workspace: DB
+    logs: DB
     memory: ChatMemory
     file_manager: FileManager

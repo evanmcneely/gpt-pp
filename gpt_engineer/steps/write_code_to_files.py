@@ -1,12 +1,20 @@
 from ..chains import write_code
 from ..system import System
+from ..ui import UI
 
 
 def write_code_to_files(system: System):
     files = write_code(system.memory.load_messages())
-    print(files)
 
+    UI.message("Writing code to file system")
     for file in files:
-        system.file_manager.add(file)
+        try:
+            path = file[0]
+            code = file[1]
+            print(path, code)
+            system.file_manager.update(path, code, 0)
+            UI.success(file[0])
+        except:
+            pass
 
     return files

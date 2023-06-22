@@ -7,6 +7,7 @@ def retrieve_files(system: System):
     file_content = system.file_manager.get_all_file_content()
     file_paths = get_imported_file_paths(file_content)
 
+    UI.message("Adding files to context")
     for path in file_paths:
         try:
             system.file_manager.add(path)

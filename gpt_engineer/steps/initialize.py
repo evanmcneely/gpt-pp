@@ -21,7 +21,7 @@ def _get_project_from_workspace(workspace: DB) -> Optional[Tuple[str, bool]]:
 
     try:
         project = workspace["project"]
-        if not project:
+        if not project.strip():
             return (None, None)
         path = resolve_path(project)
         created = validate_directory_path(path)
@@ -38,7 +38,7 @@ def _get_file_from_workspace(workspace: DB, project: str) -> Optional[str]:
     file = None
     try:
         file = workspace["file"]
-        if not file:
+        if not file.strip():
             return None
         path = resolve_path(project, file)
         validate_file_path(path)
@@ -90,6 +90,7 @@ def _get_file_input(project: str) -> str:
 
 def initialize(ignore_existing: bool):
     workspace = DB(resolve_path("workspace"))
+    logs = DB(resolve_path("logs"))
 
     project, created = _get_project_from_workspace(workspace)
     if not project or ignore_existing:
@@ -107,6 +108,7 @@ def initialize(ignore_existing: bool):
 
     system = System(
         workspace=workspace,
+        logs=logs,
         memory=ChatMemory(),
         file_manager=file_manager,
     )
