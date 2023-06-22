@@ -6,7 +6,7 @@ class MemoryManager:
     current_step: ConversationBufferMemory
     current_iteration: ConversationBufferMemory
 
-    def __init__(self, key="chat_history"):
+    def __init__(self):
         self.current_step = ConversationBufferMemory()
         self.current_iteration = ConversationBufferMemory()
 
