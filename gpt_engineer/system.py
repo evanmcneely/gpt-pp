@@ -1,10 +1,9 @@
-from typing import Optional
 import os
 from dataclasses import dataclass
 from pathlib import Path
 
-from .MemoryManager import MemoryManager
 from .FileManager import FileManager
+from .ChatMemory import ChatMemory
 
 
 class DB:
@@ -24,8 +23,6 @@ class DB:
 # dataclass for all dbs:
 @dataclass
 class System:
-    logs: DB
-    preferences: DB
     workspace: DB
-    memory: MemoryManager
-    file_manager: Optional[FileManager] = None
+    memory: ChatMemory
+    file_manager: FileManager

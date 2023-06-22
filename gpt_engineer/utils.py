@@ -4,12 +4,8 @@ import os
 def _change_permissions(path: str, permissions=0o777) -> None:
     try:
         os.chmod(path, permissions)
-    except OSError as e:
-        # TODO: handle this properly
-        print(f"print OSError in utils _change_permissions: {e}")
-        raise
-    except Exception as e:
-        print(f"print exception in utils _change_permissions: {e}")
+    except Exception:
+        # TODO: specific error messaging
         raise
 
 
@@ -32,6 +28,8 @@ def _get_file_extension(path: str) -> str:
 
 
 def resolve_path(*args: str) -> str:
+    if len(args) == 0:
+        return
     return os.path.abspath(os.path.join(os.getcwd(), *args))
 
 
@@ -44,10 +42,8 @@ def validate_file_path(abs_path: str) -> None:
 
     if not _path_exists(abs_path):
         raise ValueError(f"{abs_path} does not exist")
-
     if _is_dir(abs_path):
         raise ValueError(f"{abs_path} is a directory, not a file")
-
     if not _is_file(abs_path):
         raise ValueError(f"{abs_path} is not a file")
 
@@ -60,15 +56,13 @@ def validate_directory_path(abs_path: str) -> bool:
     # TODO: specific error messaging
 
     created = False
-
     if not _path_exists(abs_path):
         os.makedirs(abs_path)
         created = True
-
-    if _is_file(abs_path):
-        raise ValueError(f"{abs_path} is a file, not a directory")
-
-    if not _is_dir(abs_path):
-        raise ValueError(f"{abs_path} is not a directory")
+    else:
+        if _is_file(abs_path):
+            raise ValueError(f"{abs_path} is a file, not a directory")
+        if not _is_dir(abs_path):
+            raise ValueError(f"{abs_path} is not a directory")
 
     return created

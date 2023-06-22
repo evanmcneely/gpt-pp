@@ -18,14 +18,13 @@ Respond with a single question that you would need to ask to gain more clarity a
 
 Chat History: 
 {chat_history}
-human: {user_message}
 """
 
 
-def ask_for_clarification(memory: str, user_message: str):
+def ask_for_clarification(memory: str):
     chain = LLMChain(
         llm=get_llm(Models.CONVERSATION_MODEL),
         prompt=PromptTemplate.from_template(prompt),
     )
 
-    return chain.predict(user_message=user_message, chat_history=memory)
+    return chain.predict(chat_history=memory)

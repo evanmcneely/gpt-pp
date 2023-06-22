@@ -1,5 +1,4 @@
 archive
-logs/**/*
 workspace/**/*
 
 # OSX

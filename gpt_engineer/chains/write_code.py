@@ -52,7 +52,7 @@ def _parse_chat(chat) -> List[Tuple[str, str]]:
     return files
 
 
-def follow_instructions(memory: ConversationBufferMemory):
+def write_code(memory: str):
     chain = LLMChain(
         llm=get_llm(Models.CODE_MODEL),
         prompt=PromptTemplate.from_template(template),

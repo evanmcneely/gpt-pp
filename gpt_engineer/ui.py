@@ -6,7 +6,8 @@ class UI:
         typer.secho(message, fg=typer.colors.RED)
 
     def prompt(message: str) -> str:
-        return typer.prompt(message)
+        message = typer.style(message + ": ", fg=typer.colors.BLUE)
+        return input(message)
 
     def success(message: str):
         prefix = typer.style("✔ ", fg=typer.colors.GREEN, bold=True)
