@@ -1,9 +1,9 @@
 import json
 import typer
 
-from gpt_engineer.system import System
-from gpt_engineer.ui import UI
-from gpt_engineer.steps import (
+from gpt_pp.system import System
+from gpt_pp.ui import UI
+from gpt_pp.steps import (
     initialize,
     retrieve_files,
     clarify_instructions,
