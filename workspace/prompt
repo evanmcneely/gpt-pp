@@ -1,1 +1,0 @@
-rename the function handleInput in the writingAssistantHook to onInput. update the function everywhere it is used

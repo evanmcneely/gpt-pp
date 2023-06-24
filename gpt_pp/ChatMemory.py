@@ -11,8 +11,8 @@ class ChatMemory(ChatMessageHistory):
 
         for message in messages:
             if message.type == "human":
-                history += message.content + "\n"
+                history += "Human: " + message.content + "\n"
             elif message.type == "ai":
-                history += message.content + "\n"
+                history += "AI: " + message.content + "\n"
 
         return history

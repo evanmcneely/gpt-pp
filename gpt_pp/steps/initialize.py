@@ -4,68 +4,70 @@ from ..system import System, DB
 from ..FileManager import FileManager
 from ..ChatMemory import ChatMemory
 from ..ui import UI
-from ..utils import (
+from ..file_utils import (
+    ValidationError,
+    sanitize_input,
     resolve_path,
+    is_directory_empty,
     validate_file_path,
     validate_directory_path,
-    sanitize_input,
 )
 
 
-def _get_project_from_workspace(workspace: DB) -> Optional[Tuple[str, bool]]:
-    project = None
-    created = False
-
+def _get_project_from_workspace(workspace: DB) -> Optional[str]:
     try:
-        project = workspace["project"]
-        project = sanitize_input(project)
+        project = sanitize_input(workspace["project"])
         if not project:
-            return (None, None)
-        path = resolve_path(project)
-        created = validate_directory_path(path)
-    except ValueError as e:
-        UI.error(e)
-    except Exception:
-        pass
-    # TODO: specific error messaging
+            return None
 
-    return project, created
+        abs_path = resolve_path(project)
+        validate_directory_path(abs_path)
+
+    except ValidationError:
+        UI.error("Cannot use workspace project path")
+        project = None
+    except FileNotFoundError:
+        # UI.error("Project not found in workspace")
+        project = None
+
+    return project
 
 
 def _get_file_from_workspace(workspace: DB, project: str) -> Optional[str]:
-    file = None
     try:
-        file = workspace["file"]
-        file = sanitize_input(file)
+        file = sanitize_input(workspace["file"])
         if not file:
             return None
-        path = resolve_path(project, file)
-        validate_file_path(path)
-    except ValueError as e:
-        UI.error(e)
-    except Exception:
-        pass
-    # TODO: specific error messaging
+
+        abs_path = resolve_path(project, file)
+        validate_file_path(abs_path)
+
+    except ValidationError:
+        UI.error("Cannot use workspace file path")
+        file = None
+    except FileNotFoundError:
+        # UI.error("File not found in workspace")
+        file = None
 
     return file
 
 
 def _get_project_input() -> str:
-    created = False
     while True:
         project = UI.prompt(
             "Enter the relative path to the project directory you would like to work in"
         )
         project = sanitize_input(project)
-        try:
-            path = resolve_path(project)
-            created = validate_directory_path(path)
-            break
-        except ValueError as e:
-            UI.error(e)
-            pass
 
-    return project, created
+        try:
+            abs_path = resolve_path(project)
+            validate_directory_path(abs_path)
+            break
+
+        except ValidationError:
+            UI.error(f"Invalid path: {project}")
+
+    return project
 
 
 def _get_file_input(project: str) -> str:
@@ -78,8 +80,8 @@ def _get_file_input(project: str) -> str:
             path = resolve_path(project, file)
             validate_file_path(path)
             break
-        except ValueError as e:
-            UI.error(e)
+        except ValidationError:
+            UI.error(f"Invalid path: {file}")
 
     return file
 
@@ -88,14 +90,16 @@ def initialize(ignore_existing: bool):
     workspace = DB(resolve_path("workspace"))
     logs = DB(resolve_path("logs"))
 
-    project, created = _get_project_from_workspace(workspace)
+    project: str = _get_project_from_workspace(workspace)
     if not project or ignore_existing:
-        project, created = _get_project_input()
+        project = _get_project_input()
     else:
         UI.message(f"Using project {project}")
 
+    empty_directory: bool = is_directory_empty(resolve_path(project))
+
     file = None
-    if not created:
+    if not empty_directory:
         file: str = _get_file_from_workspace(workspace, project)
         if not file or ignore_existing:
             file = _get_file_input(project)
