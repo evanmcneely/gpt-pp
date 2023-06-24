@@ -27,7 +27,7 @@ second_prompt = """
 Format the code into the following structure. The code should be fully functional. No placeholders and no examples.
 
 Each file must strictly follow a markdown code block format, where the following tokens must be replaced such that
-- FILEPATH (string): is the file path from the projects root directory including the file extension (start file paths with '/')
+- FILEPATH (string): is the file path from the projects root directory including the file extension (start file paths with './')
 - LANG (string): is the markup code block language for the code's language
 - POSITION (integer): is the position in the file the code is to be inserted.
 - CODE (string): is the code

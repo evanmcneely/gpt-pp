@@ -1,4 +1,5 @@
-import os, errno, sys, tempfile, stat, functools
+import os, errno, sys, functools
+from .ui import UI
 
 
 class ValidationError(ValueError):
@@ -45,7 +46,7 @@ def _is_pathname_valid(pathname: str) -> bool:
                         return False
                 elif exc.errno in {errno.ENAMETOOLONG, errno.ERANGE}:
                     return False
-    except TypeError as exc:
+    except TypeError:
         return False
     else:
         return True
@@ -77,12 +78,18 @@ def with_permissions(func):
 
 @with_permissions
 def _is_dir(path: str) -> bool:
-    return os.path.isdir(path)
+    try:
+        return os.path.isdir(path)
+    except FileNotFoundError:
+        return False
 
 
 @with_permissions
 def _is_file(path: str) -> bool:
-    return os.path.isfile(path)
+    try:
+        return os.path.isfile(path)
+    except FileNotFoundError:
+        return False
 
 
 def _is_file_extension_valid(file_path: str) -> bool:
@@ -125,8 +132,15 @@ def is_directory_empty(path: str) -> bool:
     :param dir_path: absolute path of the directory
     :return: True if directory is empty, else False
     """
-    abs_path = resolve_path(path)
-    return len(os.listdir(abs_path)) == 0
+    try:
+        contents = os.listdir(path)
+        filtered_contents = [
+            f for f in contents if not f.startswith(".") and not f.startswith("..")
+        ]
+        return len(filtered_contents) == 0
+    except Exception as e:
+        UI.error(f"Error while checking if directory is empty: {e}")
+        return False
 
 
 def validate_file_path(abs_path: str) -> None:

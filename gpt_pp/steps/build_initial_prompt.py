@@ -3,8 +3,7 @@ from ..ui import UI
 
 
 def _format_initial_prompt(prompt: str, file_content: str) -> str:
-    return f"""
-    {prompt}
+    return f"""{prompt}
 
     {file_content}
     """

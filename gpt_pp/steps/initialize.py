@@ -27,7 +27,6 @@ def _get_project_from_workspace(workspace: DB) -> Optional[str]:
         UI.error("Cannot use workspace project path")
         project = None
     except FileNotFoundError:
-        # UI.error("Project not found in workspace")
         project = None
 
     return project
@@ -46,7 +45,6 @@ def _get_file_from_workspace(workspace: DB, project: str) -> Optional[str]:
         UI.error("Cannot use workspace file path")
         file = None
     except FileNotFoundError:
-        # UI.error("File not found in workspace")
         file = None
 
     return file
@@ -66,6 +64,8 @@ def _get_project_input() -> str:
 
         except ValidationError:
             UI.error(f"Invalid path: {project}")
+        except FileNotFoundError:
+            UI.error(f"Directory not found: {project}")
 
     return project
 
@@ -82,6 +82,8 @@ def _get_file_input(project: str) -> str:
             break
         except ValidationError:
             UI.error(f"Invalid path: {file}")
+        except FileNotFoundError:
+            UI.error(f"File not found: {file}")
 
     return file
 

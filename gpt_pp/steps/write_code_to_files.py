@@ -13,17 +13,13 @@ def write_code_to_files(system: System):
     for file in files:
         try:
             path = sanitize_input(file[0])
-            position = sanitize_input(file[1])
+            position = file[1]
             code = file[2]
-            print(path, position)
-            print(code)
 
             if path not in current_paths:
-                print("creating file")
                 file_manager.create(path, code)
 
             else:
-                print("updating file")
                 file_manager.update(path, code, position - 1)
 
             UI.success(path)
@@ -32,4 +28,4 @@ def write_code_to_files(system: System):
         except ValueError as e:
             UI.fail(f"{path} - {str(e)}")
         except Exception as e:
-            UI.fail(f"{path} - unknown reason")
+            UI.fail(f"{path} - unknown error {str(e)}")
