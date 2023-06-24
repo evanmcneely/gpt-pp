@@ -3,37 +3,57 @@ import re
 from typing import List, Tuple
 
 from langchain import PromptTemplate, LLMChain
+from langchain.chains import SimpleSequentialChain
 from langchain.memory import ConversationBufferMemory
 from langchain.callbacks import StreamingStdOutCallbackHandler
 
 from ..llm import get_llm
+from ..file_utils import sanitize_path
 from config import Models
 
-template = """
-Write the code that meets the instruction requirements. Follow these instructions to do it.
+first_prompt = """
+Write the code that meets the instruction requirements.
 
-First, think about how you are going to implement the code. Document your thoughts.
+Start by thinking about how you are going to implement the code. Document your thoughts.
 
-Then you will output the content for each file. Each file must strictly follow a markdown code block format, where the following tokens must be replaced such that
-- FILEPATH is the file path in the projects root directory including the file extension (start file paths with '/')
-- LANG is the markup code block language for the code's language
-- POSITION is the position in the file the code is to be inserted.
-- CODE is the code
+Then write the code needed for each file. Please note that the code should be fully functional. No placeholders.
+
+Instructions:
+{chat_history}
+
+"""
+
+second_prompt = """
+Format the code into the following structure. The code should be fully functional. No placeholders and no examples.
+
+Each file must strictly follow a markdown code block format, where the following tokens must be replaced such that
+- FILEPATH (string): is the file path from the projects root directory including the file extension (start file paths with '/')
+- LANG (string): is the markup code block language for the code's language
+- POSITION (integer): is the position in the file the code is to be inserted.
+- CODE (string): is the code
 
 FILEPATH, POSITION
 ```LANG
 CODE
 ```
 
-Please note that the code should be fully functional. No placeholders.
+Example 1:
+/main.py, 1
+```python
+print("hello world")
+```
 
+Example 2:
+/src/components/MyComponent.tsx, 7
+```tsx
+const MyComponent = () => (
+    <div>Hello World</div>
+)
+````
 
-Chat history:
-{chat_history}
+Here is the code that we need to format
+{the_code}
 
-Remember to follow the markdown code block format.
-
-Begin
 """
 
 
@@ -44,42 +64,32 @@ def _codeblock_search(chat: str):
 
 def _parse_chat(chat: str):
     matches = _codeblock_search(chat)
-    print(chat)
 
     files = []
     for match in matches:
-        # Strip the filename of any non-allowed characters and convert / to \
-        path = re.sub(r'[<>"|?*]', "", match.group(1))
-        position = int(match.group(2)) if match.group(2) else None
-        # Remove leading and trailing brackets
-        path = re.sub(r"^\[(.*)\]$", r"\1", path)
-
-        # Remove leading and trailing backticks
-        path = re.sub(r"^`(.*)`$", r"\1", path)
-
-        # Remove trailing ]
-        path = re.sub(r"\]$", "", path)
-
-        # Get the code
+        path = sanitize_path(re.sub(r'[<>"|?*]', "", match.group(1)))
+        position = int(match.group(2)) if match.group(2) else 0
         code = match.group(3)
 
-        # Add the file to the list
         files.append((path, position, code))
 
-    # Get all the text before the first ``` block
-    explanation = chat.split("```")[0]
-
-    # Return the files
-    return files, explanation
+    return files
 
 
 @Halo(text="Generating code", spinner="dots")
 def write_code(memory: str):
-    chain = LLMChain(
+    write = LLMChain(
         llm=get_llm(Models.CODE_MODEL),
-        prompt=PromptTemplate.from_template(template),
+        prompt=PromptTemplate(input_variables=["chat_history"], template=first_prompt),
     )
 
-    result = chain.predict(chat_history=memory)
+    format = LLMChain(
+        llm=get_llm(Models.CODE_MODEL),
+        prompt=PromptTemplate(input_variables=["the_code"], template=second_prompt),
+    )
+
+    chain = SimpleSequentialChain(chains=[write, format])
+
+    result = chain.run(memory)
 
     return _parse_chat(result)

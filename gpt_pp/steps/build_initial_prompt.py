@@ -4,7 +4,7 @@ from ..ui import UI
 
 def _format_initial_prompt(prompt: str, file_content: str) -> str:
     return f"""
-    Instructions: {prompt}
+    {prompt}
 
     {file_content}
     """

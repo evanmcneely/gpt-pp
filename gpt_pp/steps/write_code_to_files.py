@@ -7,7 +7,7 @@ from ..file_utils import sanitize_input, ValidationError
 def write_code_to_files(system: System):
     file_manager = system.file_manager
     current_paths = file_manager.files.keys()
-    files, explanation = write_code(system.memory.load_messages())
+    files = write_code(system.memory.load_messages())
 
     UI.message("Writing code to file system")
     for file in files:
@@ -33,5 +33,3 @@ def write_code_to_files(system: System):
             UI.fail(f"{path} - {str(e)}")
         except Exception as e:
             UI.fail(f"{path} - unknown reason")
-
-    # UI.message(explanation)

@@ -51,39 +51,6 @@ def _is_pathname_valid(pathname: str) -> bool:
         return True
 
 
-# see https://stackoverflow.com/questions/9532499/check-whether-a-path-is-valid-in-python-without-creating-a-file-at-the-paths-ta
-def _is_path_sibling_creatable(pathname: str) -> bool:
-    """
-    `True` if the current user has sufficient permissions to create **siblings**
-    (i.e., arbitrary files in the parent directory) of the passed pathname;
-    `False` otherwise.
-    """
-    dirname = os.path.dirname(pathname) or os.getcwd()
-
-    try:
-        with tempfile.TemporaryFile(dir=dirname):
-            pass
-        return True
-    except EnvironmentError:
-        return False
-
-
-# see https://stackoverflow.com/questions/9532499/check-whether-a-path-is-valid-in-python-without-creating-a-file-at-the-paths-ta
-def _is_path_exists_or_creatable_portable(pathname: str) -> bool:
-    """
-    `True` if the passed pathname is a valid pathname on the current OS _and_
-    either currently exists or is hypothetically creatable in a cross-platform
-    manner optimized for POSIX-unfriendly filesystems; `False` otherwise.
-
-    This function is guaranteed to _never_ raise exceptions.
-    """
-    try:
-        return _is_pathname_valid(pathname) and _is_path_sibling_creatable(pathname)
-
-    except OSError:
-        return False
-
-
 def _change_permissions(path: str, permissions=0o777) -> None:
     try:
         os.chmod(path, permissions)
