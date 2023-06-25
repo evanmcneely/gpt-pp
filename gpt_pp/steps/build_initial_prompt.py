@@ -28,9 +28,9 @@ def _get_prompt_from_input() -> str:
     return prompt
 
 
-def build_initial_prompt(system: System):
+def build_initial_prompt(system: System, ignore_workspace: str):
     prompt: str = _get_prompt_from_workspace(system)
-    if not prompt:
+    if not prompt or ignore_workspace:
         prompt = _get_prompt_from_input()
 
     file_content: str = system.file_manager.get_all_file_content()

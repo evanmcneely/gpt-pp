@@ -10,6 +10,8 @@ def retrieve_files(system: System):
         return None
 
     file_paths = get_imported_file_paths(file_content)
+    if not file_paths:
+        return None
 
     UI.message("Adding files to context")
     for path in file_paths:

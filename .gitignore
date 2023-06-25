@@ -1,6 +1,8 @@
 archive
-workspace/**/*
-logs/**/*
+!workspace
+!logs
+workspace/*
+logs/*
 
 # OSX
 .DS_STORE

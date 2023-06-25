@@ -32,27 +32,16 @@ class FileManager:
 
     def create(self, path: str, content: str):
         """Creates a new file with the given path and content."""
-        print("creating file at", path)
         if path in self.files:
             raise ValueError("File already in manager")
 
-        validate_file_path(resolve_path(path))
-        print("here 1")
-
         file = WrappedFile.from_path(path, self.project_path)
-        print("here 2")
-
         file.write(content)
-        print("here 3")
 
         self.files[path] = file
 
     def update(self, path: str, content: str, start: int):
         """Updates the content of an existing file with the given content, starting at the given offset."""
-        print("updating file at", path)
-        if path in self.files:
-            raise ValueError("File already in manager")
-
         file = self.files[path]
         file.update(content, start)
 
@@ -83,6 +72,7 @@ class FileManager:
 
         file = WrappedFile.from_path(path, self.project_path)
         self.files[path] = file
+        return file
 
     def __eq__(self, other):
         if isinstance(other, FileManager):

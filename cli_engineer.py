@@ -24,20 +24,26 @@ def _save_to_logs(system: System, messages: str, run_name: str):
 def setup(
     ignore_existing: bool = typer.Option(
         False,
-        "-i",
+        "--no-workspace",
         help="ignore existing project/file paths and prompts in the workspace directory if they exist",
     ),
     run_name: str = typer.Option(
         "default",
-        "-r",
+        "--log-prefix",
         help="name of the log file",
+    ),
+    ignore_imports: bool = typer.Option(
+        False,
+        "--no-imports",
+        help="do not load any files from file imports into context",
     ),
 ):
     try:
         system: System = initialize(ignore_existing)
 
-        retrieve_files(system)
-        build_initial_prompt(system)
+        if not ignore_imports:
+            retrieve_files(system)
+        build_initial_prompt(system, ignore_existing)
 
         while True:
             clarify_instructions(system)

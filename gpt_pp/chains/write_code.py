@@ -9,6 +9,7 @@ from langchain.callbacks import StreamingStdOutCallbackHandler
 
 from ..llm import get_llm
 from ..file_utils import sanitize_path
+from ..system import System
 from config import Models
 
 first_prompt = """
@@ -38,13 +39,13 @@ CODE
 ```
 
 Example 1:
-/main.py, 1
+./main.py, 1
 ```python
 print("hello world")
 ```
 
 Example 2:
-/src/components/MyComponent.tsx, 7
+./src/components/MyComponent.tsx, 7
 ```tsx
 const MyComponent = () => (
     <div>Hello World</div>
@@ -62,13 +63,13 @@ def _codeblock_search(chat: str):
     return re.finditer(regex, chat, re.DOTALL)
 
 
-def _parse_chat(chat: str):
+def _parse_chat(chat: str) -> List[Tuple[str, int, str]]:
     matches = _codeblock_search(chat)
 
     files = []
     for match in matches:
         path = sanitize_path(re.sub(r'[<>"|?*]', "", match.group(1)))
-        position = int(match.group(2)) if match.group(2) else 0
+        position = int(match.group(2)) if match.group(2) else 1
         code = match.group(3)
 
         files.append((path, position, code))
@@ -77,7 +78,7 @@ def _parse_chat(chat: str):
 
 
 @Halo(text="Generating code", spinner="dots")
-def write_code(memory: str):
+def write_code(system: System):
     write = LLMChain(
         llm=get_llm(Models.CODE_MODEL),
         prompt=PromptTemplate(input_variables=["chat_history"], template=first_prompt),
@@ -90,6 +91,8 @@ def write_code(memory: str):
 
     chain = SimpleSequentialChain(chains=[write, format])
 
-    result = chain.run(memory)
+    result = chain.run(system.memory.load_messages())
+
+    system.memory.add_ai_message(result)
 
     return _parse_chat(result)

@@ -110,7 +110,7 @@ def initialize(ignore_existing: bool):
 
     file_manager = FileManager(project)
     if file:
-        file_manager.add(file, seed=True)
+        file_manager.add(file)
 
     system = System(
         workspace=workspace,
