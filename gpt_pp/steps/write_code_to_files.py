@@ -1,4 +1,4 @@
-from ..chains import write_code
+from ..ai import write_code
 from ..system import System
 from ..ui import UI
 from ..file_utils import sanitize_input, ValidationError

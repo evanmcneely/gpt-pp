@@ -1,5 +1,5 @@
 from ..system import System
-from ..chains import get_imported_file_paths
+from ..ai import get_imported_file_paths
 from ..ui import UI
 from ..file_utils import sanitize_input
 

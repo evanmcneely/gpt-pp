@@ -1,6 +1,6 @@
 from ..system import System
 from ..ui import UI
-from ..chains import ask_for_clarification
+from ..ai import ask_for_clarification
 
 
 def _is_end_sequence(sequence: str) -> bool:
