@@ -1,8 +1,8 @@
 from typing import Optional, Tuple
 
 from ..system import System, DB
-from ..FileManager import FileManager
-from ..ChatMemory import ChatMemory
+from ..file_manager import FileManager
+from ..chat_memory import ChatMemory
 from ..ui import UI
 from ..file_utils import (
     ValidationError,

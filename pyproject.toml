@@ -86,8 +86,8 @@ split-on-trailing-comma = false
 lines-between-types = 1
 
 [tool.black]
-line-length = 90
-target-version = ["py311"]
+line-length = 88
+target-version = ["py310"]
 include = '\.pyi?$'
 exclude = '''
 (

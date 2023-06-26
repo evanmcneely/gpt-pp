@@ -1,11 +1,10 @@
 from typing import Dict, Optional
 from functools import total_ordering
 
-from .WrappedFile import WrappedFile
+from .wrapped_file import WrappedFile
 from .file_utils import (
     resolve_path,
     validate_file_path,
-    with_permissions,
 )
 
 
