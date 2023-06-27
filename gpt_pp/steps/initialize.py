@@ -1,17 +1,12 @@
 from typing import Optional, Tuple
 
-from ..system import System, DB
-from ..file_manager import FileManager
 from ..chat_memory import ChatMemory
+from ..file_manager import FileManager
+from ..file_utils import (ValidationError, is_directory_empty, resolve_path,
+                          sanitize_input, validate_directory_path,
+                          validate_file_path)
+from ..system import DB, System
 from ..ui import UI
-from ..file_utils import (
-    ValidationError,
-    sanitize_input,
-    resolve_path,
-    is_directory_empty,
-    validate_file_path,
-    validate_directory_path,
-)
 
 
 def _get_project_from_workspace(workspace: DB) -> Optional[str]:

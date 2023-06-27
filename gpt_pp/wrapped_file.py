@@ -1,12 +1,8 @@
 import os
 from typing import Optional
 
-from .file_utils import (
-    resolve_path,
-    with_permissions,
-    validate_file_path,
-    ValidationError,
-)
+from .file_utils import (ValidationError, resolve_path, validate_file_path,
+                         with_permissions)
 
 
 @with_permissions

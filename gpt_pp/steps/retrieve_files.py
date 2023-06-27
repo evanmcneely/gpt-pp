@@ -1,7 +1,7 @@
-from ..system import System
 from ..ai import get_imported_file_paths
-from ..ui import UI
 from ..file_utils import sanitize_input
+from ..system import System
+from ..ui import UI
 
 
 def retrieve_files(system: System):
@@ -9,7 +9,7 @@ def retrieve_files(system: System):
     if not file_content:
         return None
 
-    file_paths = get_imported_file_paths(file_content)
+    file_paths = get_imported_file_paths(system, file_content)
     if not file_paths:
         return None
 

@@ -1,6 +1,7 @@
-from langchain.chat_models import ChatOpenAI, ChatAnthropic
+from langchain.chat_models import ChatAnthropic, ChatOpenAI
 
-from config import OpenAIModels, AnthropicAIModels, OPENAI_API_KEY, ANTHROPIC_API_KEY
+from config import (ANTHROPIC_API_KEY, OPENAI_API_KEY, AnthropicAIModels,
+                    OpenAIModels)
 
 
 def _get_openai(model: str, **kwargs):

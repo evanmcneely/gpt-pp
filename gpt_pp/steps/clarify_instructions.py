@@ -1,6 +1,6 @@
+from ..ai import ask_for_clarification
 from ..system import System
 from ..ui import UI
-from ..ai import ask_for_clarification
 
 
 def _is_end_sequence(sequence: str) -> bool:
@@ -8,7 +8,7 @@ def _is_end_sequence(sequence: str) -> bool:
 
 
 def _handle_ai_message(system: System) -> str:
-    ai: str = ask_for_clarification(system.memory.load_messages())
+    ai: str = ask_for_clarification(system)
     system.memory.add_ai_message(ai)
     return ai
 
@@ -27,3 +27,5 @@ def clarify_instructions(system: System):
     while not _is_end_sequence(ai):
         _handle_user_message(system, ai)
         ai = _handle_ai_message(system)
+
+    system.save_to_logs("clarify_instructions", system.memory.load_messages_as_string())

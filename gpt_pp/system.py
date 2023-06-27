@@ -1,9 +1,11 @@
+import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
-from .file_manager import FileManager
 from .chat_memory import ChatMemory
+from .file_manager import FileManager
 
 
 class DB:
@@ -27,3 +29,6 @@ class System:
     logs: DB
     memory: ChatMemory
     file_manager: FileManager
+
+    def save_to_logs(self, name: str, stuff: Any):
+        self.logs[name] = json.dumps(stuff)

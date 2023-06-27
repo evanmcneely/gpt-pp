@@ -38,3 +38,4 @@ def build_initial_prompt(system: System, ignore_workspace: str):
     initial_prompt = _format_initial_prompt(prompt, file_content)
 
     system.memory.add_user_message(initial_prompt)
+    system.save_to_logs("build_initial_prompt", initial_prompt)

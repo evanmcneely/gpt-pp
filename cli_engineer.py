@@ -1,23 +1,14 @@
 import json
+
 import typer
 
+from gpt_pp.steps import (build_initial_prompt, clarify_instructions,
+                          initialize, provide_feedback, retrieve_files,
+                          write_code_to_files)
 from gpt_pp.system import System
 from gpt_pp.ui import UI
-from gpt_pp.steps import (
-    initialize,
-    retrieve_files,
-    clarify_instructions,
-    write_code_to_files,
-    build_initial_prompt,
-    provide_feedback,
-)
-
 
 app = typer.Typer()
-
-
-def _save_to_logs(system: System, messages: str, run_name: str):
-    system.logs[run_name] = json.dumps(messages)
 
 
 @app.command()
@@ -48,11 +39,11 @@ def setup(
         while True:
             clarify_instructions(system)
             write_code_to_files(system)
-            _save_to_logs(system, system.memory.load_messages(), run_name)
+            system.save_to_logs("iteration", system.memory.load_messages_as_string())
             provide_feedback(system)
 
     except Exception as e:
-        UI.error(e)
+        UI.error(str(e))
 
 
 if __name__ == "__main__":

@@ -1,30 +1,23 @@
-from halo import Halo
 import re
 from typing import List, Tuple
 
-from langchain import PromptTemplate, LLMChain
-from langchain.chains import SimpleSequentialChain
-from langchain.memory import ConversationBufferMemory
-from langchain.callbacks import StreamingStdOutCallbackHandler
+from halo import Halo
 
-from ..llm import get_llm
-from ..file_utils import sanitize_path
-from ..system import System
 from config import Models
 
-first_prompt = """
+from ..file_utils import sanitize_path
+from ..llm import get_llm
+from ..system import System
+
+code_prompt = """
 Write the code that meets the instruction requirements.
 
 Start by thinking about how you are going to implement the code. Document your thoughts.
 
 Then write the code needed for each file. Please note that the code should be fully functional. No placeholders.
-
-Instructions:
-{chat_history}
-
 """
 
-second_prompt = """
+diff_prompt = """
 Format the code into the following structure. The code should be fully functional. No placeholders and no examples.
 
 Each file must strictly follow a markdown code block format, where the following tokens must be replaced such that
@@ -51,10 +44,6 @@ const MyComponent = () => (
     <div>Hello World</div>
 )
 ````
-
-Here is the code that we need to format
-{the_code}
-
 """
 
 
@@ -79,20 +68,18 @@ def _parse_chat(chat: str) -> List[Tuple[str, int, str]]:
 
 @Halo(text="Generating code", spinner="dots")
 def write_code(system: System):
-    write = LLMChain(
-        llm=get_llm(Models.CODE_MODEL),
-        prompt=PromptTemplate(input_variables=["chat_history"], template=first_prompt),
+    llm = get_llm(Models.CODE_MODEL)
+
+    system.memory.add_user_message(code_prompt)
+    code = llm(system.memory.get_messages())
+    system.memory.add_ai_message(code.content)
+
+    system.memory.add_user_message(diff_prompt)
+    result = llm(system.memory.get_messages())
+    system.memory.add_ai_message(result.content)
+
+    system.save_to_logs(
+        "write_code", [code_prompt, code.content, diff_prompt, result.content]
     )
 
-    format = LLMChain(
-        llm=get_llm(Models.CODE_MODEL),
-        prompt=PromptTemplate(input_variables=["the_code"], template=second_prompt),
-    )
-
-    chain = SimpleSequentialChain(chains=[write, format])
-
-    result = chain.run(system.memory.load_messages())
-
-    system.memory.add_ai_message(result)
-
-    return _parse_chat(result)
+    return _parse_chat(result.content)

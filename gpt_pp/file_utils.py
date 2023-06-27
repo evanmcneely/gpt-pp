@@ -1,4 +1,8 @@
-import os, errno, sys, functools
+import errno
+import functools
+import os
+import sys
+
 from .ui import UI
 
 
