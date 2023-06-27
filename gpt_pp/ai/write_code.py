@@ -48,11 +48,15 @@ const MyComponent = () => (
 
 
 def _codeblock_search(chat: str):
+    """Apply a regex on a chat string and return the matches."""
     regex = r"(\S+)(?:, (\d+))?\n\s*```[^\n]*\n(.+?)```"
     return re.finditer(regex, chat, re.DOTALL)
 
 
 def _parse_chat(chat: str) -> List[Tuple[str, int, str]]:
+    """Parse an AI models completion string into a list of 
+    touples (path, position, code).
+    """
     matches = _codeblock_search(chat)
 
     files = []
@@ -67,7 +71,11 @@ def _parse_chat(chat: str) -> List[Tuple[str, int, str]]:
 
 
 @Halo(text="Generating code", spinner="dots")
-def write_code(system: System):
+def write_code(system: System) -> List[Tuple[str, int, str]]:
+    """Prompt an AI model to write the code to fulfill the instructions
+    outlined in chat history. Return a list of tuples (path, position, code)
+    representig the file path, position in the file and code block.
+    """
     llm = get_llm(Models.CODE_MODEL)
 
     system.memory.add_user_message(code_prompt)

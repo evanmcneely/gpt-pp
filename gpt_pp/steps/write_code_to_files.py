@@ -5,6 +5,9 @@ from ..ui import UI
 
 
 def write_code_to_files(system: System):
+    """Generate code to implement the instructions in chat history and write
+    those changes to the file system.
+    """
     file_manager = system.file_manager
     current_paths = file_manager.files.keys()
     files = write_code(system)

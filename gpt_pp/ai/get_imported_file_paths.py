@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from halo import Halo
 from langchain import PromptTemplate
@@ -11,7 +11,11 @@ from ..llm import get_llm
 from ..system import System
 
 
-def _parse_output(content: str) -> Optional[str]:
+def _parse_output(content: str) -> Optional[List[str]]:
+    """Parse an AI models completion string into either a list of
+    strings, split on the occurrence of a comma, or None if the
+    end sequence 'nothing to import' is found.
+    """
     if sanitize_input(content).lower() == "nothing to import":
         return None
 
@@ -26,7 +30,10 @@ Determine the paths to all the files imported into the files below from the proj
 
 
 @Halo(text="Loading relative files", spinner="dots")
-def get_imported_file_paths(system: System, file: str):
+def get_imported_file_paths(system: System, file: str) -> Optional[List[str]]:
+    """Prompt an AI model for a list of imported files given the content of a file.
+    Return a list of the imported file paths or None if there are no imported files.
+    """
     prompt = PromptTemplate.from_template(get_imports_prompt).format(file=file)
     llm = get_llm(Models.INTERPRETATION_MODEL)
 

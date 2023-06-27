@@ -5,7 +5,10 @@ from langchain.schema import BaseMessage
 
 
 class ChatMemory(ChatMessageHistory):
+    """Manage chat history."""
+
     def load_messages_as_string(self) -> str:
+        """Convert chat messages to a string and return it."""
         messages: List[BaseMessage] = self.messages
         history: str = ""
 
@@ -18,4 +21,5 @@ class ChatMemory(ChatMessageHistory):
         return history
 
     def get_messages(self) -> List[BaseMessage]:
+        """Return the chat history as a list of messages."""
         return self.messages

@@ -5,6 +5,10 @@ from ..ui import UI
 
 
 def retrieve_files(system: System):
+    """Retrieve all the file paths imported into the content stored in the 
+    FileManager. Add the paths to the FileManager or return early if no files
+    or paths exist.
+    """
     file_content = system.file_manager.get_all_file_content()
     if not file_content:
         return None
