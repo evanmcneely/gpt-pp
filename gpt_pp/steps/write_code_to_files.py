@@ -1,35 +1,77 @@
-from ..ai import write_code
-from ..file_utils import ValidationError, sanitize_input
+from typing import List, Optional, Tuple
+
+from halo import Halo
+
+from ..file_utils import ValidationError
 from ..system import System
 from ..ui import UI
+
+from ..ai import (  # isort:skip
+    generate_diff,
+    generate_file_content,
+    get_files_that_require_changes,
+    write_code,
+)
+
+
+class file_operations:
+    DELETE = "delete"
+    PATCH = "patch"
+    CREATE = "create"
+
+
+@Halo(text="Generating code", spinner="dots")
+def _get_code_and_file_changes(system: System) -> Optional[List[Tuple[str, str]]]:
+    write_code(system)
+    files = get_files_that_require_changes(system)
+    return files
+
+
+@Halo(text="Write to file system", spinner="dots")
+def _write_to_file_system(
+    system: System, changes: List[Tuple[str, str]]
+) -> List[Tuple[str, bool, Optional[str]]]:
+    change_status = []
+    file_manager = system.file_manager
+
+    for file in changes:
+        try:
+            path = file[0]
+            operation = file[1]
+
+            if operation == file_operations.DELETE:
+                file_manager.delete(path)
+            elif operation == file_operations.PATCH:
+                diff = generate_diff(system, path)
+                file_manager.apply_patch(path, diff)
+            elif operation == file_operations.CREATE:
+                content = generate_file_content(system, path)
+                if content:
+                    file_manager.add(path, content)
+                else:
+                    raise Exception("Failed to generate file content")
+
+            change_status.append((path, True, None))
+
+        except Exception as e:
+            change_status.append((path, False, str(e)))  # type: ignore
+
+    return change_status
 
 
 def write_code_to_files(system: System):
     """Generate code to implement the instructions in chat history and write
     those changes to the file system.
     """
-    file_manager = system.file_manager
-    current_paths = file_manager.files.keys()
-    files = write_code(system)
+    required_changes = _get_code_and_file_changes(system)
+    if not required_changes:
+        return
+    change_status = _write_to_file_system(system, required_changes)
 
-    system.save_to_logs("parsed_file_diffs", files)
-
-    UI.message("Writing code to file system")
-    for file in files:
-        try:
-            path = sanitize_input(file[0])
-            position = file[1]
-            code = file[2]
-
-            if path not in current_paths:
-                file_manager.create(path, code)
-            else:
-                file_manager.update(path, code, position - 1)
+    for path, status, message in change_status:
+        if status:
             UI.success(path)
+        else:
+            UI.fail(f"{path} - {message}")
 
-        except ValidationError as e:
-            UI.fail(f"{path} - {str(e)}")
-        except ValueError as e:
-            UI.fail(f"{path} - {str(e)}")
-        except Exception as e:
-            UI.fail(f"{path} - {str(e)}")
+    system.save_to_logs("write_code_to_files", *change_status)

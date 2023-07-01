@@ -39,6 +39,6 @@ def get_imported_file_paths(system: System, file: str) -> Optional[List[str]]:
 
     result = llm([HumanMessage(content=prompt)])
 
-    system.save_to_logs("get_imported_file_paths", [prompt, result.content])
+    system.save_to_logs("get_imported_file_paths", prompt, result.content)
 
     return _parse_output(result.content)

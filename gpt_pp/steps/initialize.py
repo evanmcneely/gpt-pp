@@ -2,15 +2,21 @@ from typing import Optional, Tuple
 
 from ..chat_memory import ChatMemory
 from ..file_manager import FileManager
-from ..file_utils import (ValidationError, is_directory_empty, resolve_path,
-                          sanitize_input, validate_directory_path,
-                          validate_file_path)
 from ..system import DB, System
 from ..ui import UI
 
+from ..file_utils import (  # isort:skip
+    ValidationError,
+    is_directory_empty,
+    resolve_path,
+    sanitize_input,
+    validate_directory_path,
+    validate_file_path,
+)
+
 
 def _get_project_from_workspace(workspace: DB) -> Optional[str]:
-    """Get the project path from the workspace directory, validate the 
+    """Get the project path from the workspace directory, validate the
     path and return it. Return none if an error occurs while retrieving the
     file or validating the path.
     """
@@ -26,7 +32,6 @@ def _get_project_from_workspace(workspace: DB) -> Optional[str]:
         UI.error("Cannot use workspace project path")
         project = None
     except FileNotFoundError:
-        UI.error(f"Directory not found: {project}")
         project = None
 
     return project
@@ -49,7 +54,6 @@ def _get_file_from_workspace(workspace: DB, project: str) -> Optional[str]:
         UI.error("Cannot use workspace file path")
         file = None
     except FileNotFoundError:
-        UI.error(f"File not found: {file}")
         file = None
 
     return file
@@ -79,7 +83,7 @@ def _get_project_input() -> str:
 
 
 def _get_file_input(project: str) -> str:
-    """Prompt the user to enter a path to a file within the project directory. 
+    """Prompt the user to enter a path to a file within the project directory.
     Validate the file path and repeat until a valid path is entered.
     """
     while True:
@@ -99,12 +103,12 @@ def _get_file_input(project: str) -> str:
     return file
 
 
-def initialize(ignore_existing: bool):
-    """Initialize the System class that the application is 
+def initialize(ignore_existing: bool, run_name: str) -> System:
+    """Initialize the System class that the application is
     dependent on and return it.
     """
     workspace = DB(resolve_path("workspace"))
-    logs = DB(resolve_path("logs"))
+    logs = DB(resolve_path(run_name + "logs"))
 
     project = _get_project_from_workspace(workspace)
     if not project or ignore_existing:

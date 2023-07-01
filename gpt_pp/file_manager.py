@@ -1,7 +1,7 @@
 from typing import Dict, Optional
 
-from .file_utils import resolve_path, validate_file_path
-from .wrapped_file import WrappedFile
+from gpt_pp.file_utils import resolve_path, validate_file_path
+from gpt_pp.wrapped_file import WrappedFile
 
 
 class FileManager:
@@ -22,38 +22,35 @@ class FileManager:
         return len(self.files)
 
     def get_file(self, path: str) -> Optional[WrappedFile]:
-        """Return the WrappedFile object corresponding to the given file path."""
+        """Return the file at the given path."""
         if path in self.files:
             return self.files[path]
         else:
             return None
 
-    def create(self, path: str, content: str):
-        """Create a new file with the given path and content."""
-        if path in self.files:
-            raise ValueError("File already in manager")
-
-        file: Optional[WrappedFile] = WrappedFile.from_path(path, self.project_path)
-        if file:
+    def add(self, path: str, content: Optional[str] = None) -> Optional[WrappedFile]:
+        """Adds a new file to the FileManager's dictionary of files."""
+        abs_path = resolve_path(self.project_path, path)
+        file: Optional[WrappedFile] = WrappedFile.from_path(abs_path)
+        if file and content:
             file.write(content)
-            self.files[path] = file
 
         return file
 
-    def update(self, path: str, content: str, start: int):
-        """Update the content of an existing file with the given 
-        content, starting at the given offset.
-        """
+    def apply_patch(self, path: str, patch: str):
+        """Apply the diff patch to the file system."""
         file = self.files[path]
-        file.update(content, start)
+        if file:
+            file.apply_patch(patch)
 
     def delete(self, path: str):
-        """Delete a file from the FileManager's dictionary of 
+        """Delete a file from the FileManager's dictionary of
         files and remove it from disk.
         """
         file = self.files[path]
-        file.delete()
-        self.files.pop(path, None)
+        if file:
+            file.delete()
+            self.files.pop(path, None)
 
     def get_content(self, path: str) -> Optional[str]:
         """Return the content of the file at the given path with line numbers
@@ -64,7 +61,7 @@ class FileManager:
             return file.read_with_line_numbers()
 
     def get_all_file_content(self) -> str:
-        """Return a string with the content of all files, each 
+        """Return a string with the content of all files, each
         with line numbers, sorted by file path.
         """
         files_content = []
@@ -72,14 +69,3 @@ class FileManager:
             files_content.append(file.read_with_line_numbers())
 
         return "\n\n".join(files_content)
-
-    def add(self, path: str) -> Optional[WrappedFile]:
-        """Adds a new file to the FileManager's dictionary of files."""
-        abs_path = resolve_path(self.project_path, path)
-        validate_file_path(abs_path)
-
-        file: Optional[WrappedFile] = WrappedFile.from_path(path, self.project_path)
-        if file:
-            self.files[path] = file
-
-        return file

@@ -19,7 +19,7 @@ def setup(
         help="ignore existing project/file paths and prompts in the workspace directory if they exist",
     ),
     run_name: str = typer.Option(
-        "default",
+        "",
         "--log-prefix",
         help="name of the log file",
     ),
@@ -30,7 +30,7 @@ def setup(
     ),
 ):
     try:
-        system: System = initialize(ignore_existing)
+        system: System = initialize(ignore_existing, run_name)
 
         if not ignore_imports:
             retrieve_files(system)
@@ -43,7 +43,7 @@ def setup(
             provide_feedback(system)
 
     except Exception as e:
-        UI.error(str(e))
+        UI.error(e)
 
 
 if __name__ == "__main__":

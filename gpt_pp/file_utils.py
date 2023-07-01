@@ -2,6 +2,7 @@ import errno
 import functools
 import os
 import sys
+from typing import Any
 
 from .ui import UI
 
@@ -10,12 +11,35 @@ class ValidationError(ValueError):
     pass
 
 
-# Sadly, Python fails to provide the following magic number for us.
-ERROR_INVALID_NAME = 123
-
 # just because it isn't here doesn't mean it shouldn't be allowed
 DISALLOWED_FILE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg"]
 DISALLOWED_FILE_DIRECTORIES = ["node_modules"]
+
+
+def resolve_path(*args: str) -> str:
+    """Resolve a path relative to the current working directory
+    into an absolute path.
+    """
+    if len(args) == 0:
+        return ""
+    return os.path.abspath(os.path.join(os.getcwd(), *args))
+
+
+def sanitize_path(path: str) -> str:
+    """Sanitize a path by removing leading and trailing spaces and newlines."""
+    return path.strip(" \n") if path else ""
+
+
+def sanitize_input(input: str) -> str:
+    """Sanitize an input by removing leading and trailing spaces and newlines
+    and return only the first line."""
+    if not input:
+        return ""
+
+    # only using the first line
+    input = input.split("\n")[0]
+
+    return sanitize_path(input)
 
 
 # see https://stackoverflow.com/questions/9532499/check-whether-a-path-is-valid-in-python-without-creating-a-file-at-the-paths-ta
@@ -23,6 +47,9 @@ def _is_pathname_valid(pathname: str) -> bool:
     """`True` if the passed pathname is a valid pathname for the current OS;
     `False` otherwise.
     """
+    # Sadly, Python fails to provide the following magic number for us.
+    ERROR_INVALID_NAME = 123
+
     try:
         if not isinstance(pathname, str) or not pathname:
             return False
@@ -51,33 +78,46 @@ def _is_pathname_valid(pathname: str) -> bool:
         return True
 
 
-def _change_permissions(path: str, permissions=0o777) -> None:
-    """Change the permissions of the file at the given path."""
-    try:
-        os.chmod(path, permissions)
-    except Exception:
-        # ignore
-        pass
-
-
-def _get_file_extension(path: str) -> str:
-    """Get the file extension of a file path."""
-    return os.path.splitext(path)[1].lower()
-
-
 def with_permissions(func):
-    """Wrap a function and change the permissions of a file at the 
+    """Wrap a function and change the permissions of a file at the
     specified path and change the permissions back afterwards.
     """
+
+    def _change_permissions(path: str, permissions=0o777) -> None:
+        """Change the permissions of the file at the given path."""
+        try:
+            os.chmod(path, permissions)
+        except Exception:
+            # ignore
+            pass
+
     @functools.wraps(func)
-    def wrapper(path, *args, **kwargs):
+    def wrapper(blob: Any, *args, **kwargs):
+        # NOTE: delay import circular dependency
+        from gpt_pp.wrapped_file import WrappedFile
+
+        path = blob
+        if isinstance(blob, WrappedFile):
+            path = blob.abs_path
+
         mode = os.stat(path).st_mode
         _change_permissions(path)
-        result = func(path, *args, **kwargs)
+
+        result = func(blob, *args, **kwargs)
+
         _change_permissions(path, permissions=mode)
         return result
 
     return wrapper
+
+
+@with_permissions
+def _path_exists(path: str) -> bool:
+    """`True` if the given path exists; `False` otherwise."""
+    try:
+        return os.path.exists(path)
+    except FileNotFoundError:
+        return False
 
 
 @with_permissions
@@ -98,6 +138,11 @@ def _is_file(path: str) -> bool:
         return False
 
 
+def _get_file_extension(path: str) -> str:
+    """Get the file extension of a file path."""
+    return os.path.splitext(path)[1].lower()
+
+
 def _is_file_extension_valid(file_path: str) -> bool:
     """`True` if the given file path is a valid file extension for
     the appliciton; `False` otherwise.
@@ -116,36 +161,9 @@ def _is_parent_directory_valid(dir_path: str) -> bool:
     return True
 
 
-def resolve_path(*args: str) -> str:
-    """Resolve a path relative to the current working directory 
-    into an absolute path.
-    """
-    if len(args) == 0:
-        return ""
-    return os.path.abspath(os.path.join(os.getcwd(), *args))
-
-
-def sanitize_path(path: str) -> str:
-    """Sanitize a path by removing leading and trailing spaces and newlines."""
-    return path.strip(" \n") if path else ""
-
-
-def sanitize_input(input: str) -> str:
-    """Sanitize an input by removing leading and trailing spaces and newlines
-    and return only the first line."""
-    if not input:
-        return ""
-
-    # only using the first line
-    input = input.split("\n")[0]
-
-    return sanitize_path(input)
-
-
 @with_permissions
 def is_directory_empty(path: str) -> bool:
     """Determine if a given directory is empty or not."""
-    
     try:
         contents = os.listdir(path)
         filtered_contents = [
@@ -170,7 +188,10 @@ def validate_file_path(abs_path: str) -> None:
         raise ValidationError("Invalid directory in path")
 
     if not _is_pathname_valid(abs_path):
-        raise ValidationError("Path does not exist")
+        raise ValidationError("Path is not valid")
+
+    if not _path_exists(abs_path):
+        raise FileNotFoundError("Path does not exist")
 
     if not _is_file(abs_path):
         raise ValidationError("Path is not a file")
@@ -186,6 +207,9 @@ def validate_directory_path(abs_path: str) -> None:
         raise ValidationError("Invalid directory in path")
 
     if not _is_pathname_valid(abs_path):
+        raise ValidationError("Path is not valid")
+
+    if not _path_exists(abs_path):
         raise ValidationError("Path does not exist")
 
     if not _is_dir(abs_path):

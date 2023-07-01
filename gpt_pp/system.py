@@ -30,5 +30,6 @@ class System:
     memory: ChatMemory
     file_manager: FileManager
 
-    def save_to_logs(self, name: str, stuff: Any):
-        self.logs[name] = json.dumps(stuff)
+    def save_to_logs(self, name: str, *args: Any):
+        """Save args to logs"""
+        self.logs[name] = json.dumps(args)

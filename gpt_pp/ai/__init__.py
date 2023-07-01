@@ -1,3 +1,6 @@
 from .ask_for_clarification import ask_for_clarification
+from .generate_diff import generate_diff
+from .generate_file_content import generate_file_content
+from .get_files_that_require_changes import get_files_that_require_changes
 from .get_imported_file_paths import get_imported_file_paths
 from .write_code import write_code

@@ -1,10 +1,8 @@
+import json
 import typer
-from rich.console import Console
 
 from gpt_pp.file_utils import resolve_path
 from gpt_pp.system import DB
-
-console = Console()
 
 
 app = typer.Typer()
@@ -15,7 +13,10 @@ def log(message):
     try:
         logs = DB(resolve_path("logs"))
         data = logs[message]
-        console.log(data)
+        data = json.loads(data)
+        for item in data:
+            print('\n*** new message ***\n')
+            print(item)
     except FileNotFoundError:
         typer.echo(f"File not found: {message}")
 

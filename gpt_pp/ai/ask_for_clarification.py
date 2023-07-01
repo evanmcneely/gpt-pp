@@ -26,6 +26,6 @@ def ask_for_clarification(system: System) -> str:
     llm = get_llm(Models.CONVERSATION_MODEL)
 
     result = llm([HumanMessage(content=prompt)])
-    system.save_to_logs("ask_for_clarification", [prompt, result.content])
+    system.save_to_logs("ask_for_clarification", prompt, result.content)
 
     return result.content
