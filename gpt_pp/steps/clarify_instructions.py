@@ -1,4 +1,3 @@
-from ..ai import ask_for_clarification
 from ..system import System
 from ..ui import UI
 
@@ -8,14 +7,15 @@ def _is_end_sequence(sequence: str) -> bool:
     return sequence.strip(' ."\n').lower() == "nothing left to clarify"
 
 
-def _handle_ai_message(system: System) -> str:
+def _handle_ai_question(system: System) -> str:
     """Generate a response from an AI model and return the response."""
-    ai: str = ask_for_clarification(system)
-    system.memory.add_ai_message(ai)
-    return ai
+    chat_history = system.memory.load_messages_as_string()
+    question: str = system.ai.generate_clarifying_question(chat_history=chat_history)
+    system.memory.add_ai_message(question)
+    return question
 
 
-def _handle_user_message(system: System, ai: str) -> str:
+def _handle_user_response(system: System, ai: str) -> str:
     """Prompt the user to respond to the AI model and return the response."""
     user: str = UI.prompt(ai)
     system.memory.add_user_message(user)
@@ -27,10 +27,8 @@ def clarify_instructions(system: System):
     they are to perform. Prompt the user for clarification until the end
     sequence 'nothing left to clarify' is found.
     """
-    ai = _handle_ai_message(system)
+    ai = _handle_ai_question(system)
 
     while not _is_end_sequence(ai):
-        _handle_user_message(system, ai)
-        ai = _handle_ai_message(system)
-
-    system.save_to_logs("clarify_instructions", system.memory.load_messages_as_string())
+        _handle_user_response(system, ai)
+        ai = _handle_ai_question(system)

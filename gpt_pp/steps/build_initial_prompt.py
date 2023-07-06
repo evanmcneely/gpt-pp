@@ -39,9 +39,8 @@ def build_initial_prompt(system: System, ignore_workspace: bool):
     if not prompt or ignore_workspace:
         prompt = _get_prompt_from_input()
 
-    file_content: str = system.file_manager.get_all_file_content()
+    file_content = system.project.get_all_file_content()
 
     initial_prompt = _format_initial_prompt(prompt, file_content)
 
     system.memory.add_user_message(initial_prompt)
-    system.save_to_logs("build_initial_prompt", initial_prompt)

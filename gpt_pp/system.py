@@ -4,8 +4,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from .chat_memory import ChatMemory
-from .file_manager import FileManager
+from gpt_pp.ai import AI
+from gpt_pp.chat_memory import ChatMemory
+from gpt_pp.file_manager import FileManager
 
 
 class DB:
@@ -28,8 +29,5 @@ class System:
     workspace: DB
     logs: DB
     memory: ChatMemory
-    file_manager: FileManager
-
-    def save_to_logs(self, name: str, *args: Any):
-        """Save args to logs"""
-        self.logs[name] = json.dumps(args)
+    project: FileManager
+    ai: AI

@@ -28,11 +28,21 @@ class FileManager:
         else:
             return None
 
-    def add(self, path: str, content: Optional[str] = None) -> Optional[WrappedFile]:
+    def add(self, path: str) -> Optional[WrappedFile]:
         """Adds a new file to the FileManager's dictionary of files."""
         abs_path = resolve_path(self.project_path, path)
-        file: Optional[WrappedFile] = WrappedFile.from_path(abs_path)
-        if file and content:
+        validate_file_path(abs_path)
+        file = WrappedFile.from_path(abs_path)
+
+        if file:
+            self.files[path] = file
+
+        return file
+
+    def create(self, path: str, content: str) -> Optional[WrappedFile]:
+        file = self.add(path)
+
+        if file:
             file.write(content)
 
         return file

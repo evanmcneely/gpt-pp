@@ -2,16 +2,9 @@ from typing import List, Optional, Tuple
 
 from halo import Halo
 
-from ..file_utils import ValidationError
+from ..ai.templates import generate_all_code
 from ..system import System
 from ..ui import UI
-
-from ..ai import (  # isort:skip
-    generate_diff,
-    generate_file_content,
-    get_files_that_require_changes,
-    write_code,
-)
 
 
 class file_operations:
@@ -21,18 +14,37 @@ class file_operations:
 
 
 @Halo(text="Generating code", spinner="dots")
-def _get_code_and_file_changes(system: System) -> Optional[List[Tuple[str, str]]]:
-    write_code(system)
-    files = get_files_that_require_changes(system)
+def _get_code(system: System) -> Optional[List[Tuple[str, str]]]:
+    memory = system.memory
+    ai = system.ai
+
+    memory.add_user_message(generate_all_code)
+    code = ai.generate_code(memory.get_messages())
+
+    memory.add_ai_message(code)
+    files = ai.get_change_operations(memory.load_messages_as_string())
+
     return files
 
 
-@Halo(text="Write to file system", spinner="dots")
+def _patch_file(system: System, path: str):
+    chat = system.memory.load_messages_as_string()
+    diff = system.ai.generate_diff(chat)
+    system.project.apply_patch(path, diff)
+
+
+def _create_file(system: System, path: str):
+    chat = system.memory.load_messages_as_string()
+    content = system.ai.generate_file_content(chat, path)
+    if content:
+        system.project.create(path, content)
+
+
+@Halo(text="Updating files", spinner="dots")
 def _write_to_file_system(
     system: System, changes: List[Tuple[str, str]]
 ) -> List[Tuple[str, bool, Optional[str]]]:
     change_status = []
-    file_manager = system.file_manager
 
     for file in changes:
         try:
@@ -40,16 +52,13 @@ def _write_to_file_system(
             operation = file[1]
 
             if operation == file_operations.DELETE:
-                file_manager.delete(path)
+                system.project.delete(path)
             elif operation == file_operations.PATCH:
-                diff = generate_diff(system, path)
-                file_manager.apply_patch(path, diff)
+                _patch_file(system, path)
             elif operation == file_operations.CREATE:
-                content = generate_file_content(system, path)
-                if content:
-                    file_manager.add(path, content)
-                else:
-                    raise Exception("Failed to generate file content")
+                _create_file(system, path)
+            else:
+                raise Exception("Failed to generate file content")
 
             change_status.append((path, True, None))
 
@@ -63,9 +72,9 @@ def write_code_to_files(system: System):
     """Generate code to implement the instructions in chat history and write
     those changes to the file system.
     """
-    required_changes = _get_code_and_file_changes(system)
+    required_changes = _get_code(system)
     if not required_changes:
-        return
+        return None
     change_status = _write_to_file_system(system, required_changes)
 
     for path, status, message in change_status:
@@ -73,5 +82,3 @@ def write_code_to_files(system: System):
             UI.success(path)
         else:
             UI.fail(f"{path} - {message}")
-
-    system.save_to_logs("write_code_to_files", *change_status)

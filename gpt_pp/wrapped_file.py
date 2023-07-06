@@ -10,7 +10,7 @@ from gpt_pp.file_utils import (  # isort:skip
 
 
 # https://stackoverflow.com/questions/2307472/generating-and-applying-diffs-in-python
-def apply_diff_patch(o: str, p:str, revert=False):
+def apply_diff_patch(o: str, p: str, revert=False):
     """Apply unified diff patch to string s to recover newer string.
     If revert is True, treat s as the newer string, recover older string.
     """
@@ -53,7 +53,7 @@ class WrappedFile:
 
     abs_path: str  # absolute path to the file from the root directory
 
-    def __init__(self,  absolute_path: str):
+    def __init__(self, absolute_path: str):
         """Initialize the WrappedFile object with the given path and absolute path."""
         self.abs_path = absolute_path
 

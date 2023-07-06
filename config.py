@@ -2,6 +2,7 @@ from decouple import config
 
 OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
 ANTHROPIC_API_KEY = config("ANTHROPIC_API_KEY", default="")
+VERBOSE = config("VERBOSE", default=False, cast=bool)
 
 
 class AnthropicAIModels:

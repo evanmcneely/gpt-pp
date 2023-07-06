@@ -1,23 +1,37 @@
 from langchain.chat_models import ChatAnthropic, ChatOpenAI
 
-from config import ANTHROPIC_API_KEY, OPENAI_API_KEY, AnthropicAIModels, OpenAIModels
+from config import ( # isort:skip
+    ANTHROPIC_API_KEY, 
+    OPENAI_API_KEY, 
+    VERBOSE,
+    AnthropicAIModels,
+    OpenAIModels
+)
 
 
 def _get_openai(model: str, **kwargs):
-    """Return an instance of ChatOpenAI configured with the passed in
-    keyword arguments.
+    """Return an instance of ChatOpenAI configured with the 
+    passed in keyword arguments.
     """
     return ChatOpenAI(
-        openai_api_key=OPENAI_API_KEY, temperature=0, model_name=model, **kwargs
+        openai_api_key=OPENAI_API_KEY, 
+        temperature=0, 
+        model_name=model, 
+        verbose=VERBOSE, 
+        **kwargs
     )
 
 
 def _get_anthropic(model: str, **kwargs):
-    """Return an instance of ChatAnthropic configured with the passed in
-    keyword arguments.
+    """Return an instance of ChatAnthropic configured with the 
+    passed in keyword arguments.
     """
     return ChatAnthropic(
-        anthropic_api_key=ANTHROPIC_API_KEY, temperature=0, model=model, **kwargs
+        anthropic_api_key=ANTHROPIC_API_KEY, 
+        temperature=0, 
+        model=model,
+        verbose=VERBOSE, 
+        **kwargs
     )
 
 

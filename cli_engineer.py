@@ -1,22 +1,25 @@
-import json
-
 import typer
 
-from gpt_pp.steps import (build_initial_prompt, clarify_instructions,
-                          initialize, provide_feedback, retrieve_files,
-                          write_code_to_files)
-from gpt_pp.system import System
 from gpt_pp.ui import UI
+
+from gpt_pp.steps import (  # isort:skip
+    build_initial_prompt,
+    clarify_instructions,
+    initialize,
+    provide_feedback,
+    retrieve_files,
+    write_code_to_files,
+)
 
 app = typer.Typer()
 
 
 @app.command()
 def setup(
-    ignore_existing: bool = typer.Option(
+    ignore_workspace: bool = typer.Option(
         False,
         "--no-workspace",
-        help="ignore existing project/file paths and prompts in the workspace directory if they exist",
+        help="ignore existing project/file paths and prompts in the workspace directory if they exist",  # noqa
     ),
     run_name: str = typer.Option(
         "",
@@ -30,20 +33,19 @@ def setup(
     ),
 ):
     try:
-        system: System = initialize(ignore_existing, run_name)
+        system = initialize(ignore_workspace, run_name)
 
         if not ignore_imports:
             retrieve_files(system)
-        build_initial_prompt(system, ignore_existing)
+        build_initial_prompt(system, ignore_workspace)
 
         while True:
             clarify_instructions(system)
             write_code_to_files(system)
-            system.save_to_logs("iteration", system.memory.load_messages_as_string())
             provide_feedback(system)
 
     except Exception as e:
-        UI.error(e)
+        UI.error(str(e))
 
 
 if __name__ == "__main__":

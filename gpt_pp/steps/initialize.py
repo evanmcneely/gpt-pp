@@ -1,5 +1,6 @@
-from typing import Optional, Tuple
+from typing import Optional
 
+from ..ai import AI
 from ..chat_memory import ChatMemory
 from ..file_manager import FileManager
 from ..system import DB, System
@@ -103,38 +104,40 @@ def _get_file_input(project: str) -> str:
     return file
 
 
-def initialize(ignore_existing: bool, run_name: str) -> System:
+def initialize(ignore_workspace: bool, run_name: str) -> System:
     """Initialize the System class that the application is
     dependent on and return it.
     """
     workspace = DB(resolve_path("workspace"))
     logs = DB(resolve_path(run_name + "logs"))
+    ai = AI()
 
     project = _get_project_from_workspace(workspace)
-    if not project or ignore_existing:
+    if not project or ignore_workspace:
         project = _get_project_input()
     else:
         UI.message(f"Using project {project}")
 
-    empty_directory: bool = is_directory_empty(resolve_path(project))
+    directory_empty = is_directory_empty(resolve_path(project))
 
     file = None
-    if not empty_directory:
+    if not directory_empty:
         file = _get_file_from_workspace(workspace, project)
-        if not file or ignore_existing:
+        if not file or ignore_workspace:
             file = _get_file_input(project)
         else:
             UI.message(f"Using file {file}")
 
-    file_manager = FileManager(project)
+    project = FileManager(project)
     if file:
-        file_manager.add(file)
+        project.add(file)
 
     system = System(
         workspace=workspace,
         logs=logs,
         memory=ChatMemory(),
-        file_manager=file_manager,
+        project=project,
+        ai=ai,
     )
 
     return system
