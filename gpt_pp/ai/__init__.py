@@ -2,8 +2,10 @@ from typing import Any, List, Optional, Tuple, Union
 
 from halo import Halo
 from langchain import LLMChain, PromptTemplate
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain.chains import ConversationChain
 from langchain.chat_models.base import BaseChatModel
-# from langchain.memory import BaseChatMessageHistory
+from langchain.memory import ConversationBufferMemory
 from langchain.schema import BaseChatMessageHistory, BaseMessage, HumanMessage
 
 import gpt_pp.ai.parsers as parsers
@@ -28,7 +30,7 @@ class AI(BaseChatMessageHistory):
     @staticmethod
     def _run(model: BaseChatModel, prompt: PromptTemplate, **kwargs: Any) -> str:
         chain = LLMChain(llm=model, prompt=prompt, verbose=VERBOSE)
-        result = chain.run(**kwargs)
+        result = chain.predict(**kwargs)
         return result
 
     @Halo(text="Retrieving relevant files", spinner="dots")
@@ -70,6 +72,18 @@ class AI(BaseChatMessageHistory):
             self.code_llm, prompt, chat_history=history, file_path=file_path
         )
         return parsers.extract_code_block(completion)
+
+    def get_chat(self, files: str) -> ConversationChain:
+        memory = ConversationBufferMemory()
+        memory.save_context({"input": files})
+
+        return ConversationChain(
+            llm=self.code_llm,
+            verbose=VERBOSE,
+            memory=memory,
+            streaming=True,
+            callbacks=[StreamingStdOutCallbackHandler()],
+        )
 
     def load_messages_as_string(self) -> str:
         """Convert chat messages to a string and return it."""
