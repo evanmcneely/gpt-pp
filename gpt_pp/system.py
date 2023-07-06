@@ -1,11 +1,8 @@
-import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 from gpt_pp.ai import AI
-from gpt_pp.chat_memory import ChatMemory
 from gpt_pp.file_manager import FileManager
 
 
@@ -27,7 +24,5 @@ class DB:
 @dataclass
 class System:
     workspace: DB
-    logs: DB
-    memory: ChatMemory
     project: FileManager
     ai: AI

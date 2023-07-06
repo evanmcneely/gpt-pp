@@ -7,4 +7,4 @@ def provide_feedback(system: System):
     application has done. Add the response to chat memory.
     """
     feedback = UI.prompt("Provide feedback on the work done so far")
-    system.memory.add_user_message(feedback)
+    system.ai.add_user_message(feedback)

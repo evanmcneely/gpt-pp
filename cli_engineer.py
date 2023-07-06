@@ -21,11 +21,6 @@ def setup(
         "--no-workspace",
         help="ignore existing project/file paths and prompts in the workspace directory if they exist",  # noqa
     ),
-    run_name: str = typer.Option(
-        "",
-        "--log-prefix",
-        help="name of the log file",
-    ),
     ignore_imports: bool = typer.Option(
         False,
         "--no-imports",
@@ -33,7 +28,7 @@ def setup(
     ),
 ):
     try:
-        system = initialize(ignore_workspace, run_name)
+        system = initialize(ignore_workspace)
 
         if not ignore_imports:
             retrieve_files(system)

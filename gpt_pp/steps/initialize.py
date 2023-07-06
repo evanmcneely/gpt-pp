@@ -1,7 +1,6 @@
 from typing import Optional
 
 from ..ai import AI
-from ..chat_memory import ChatMemory
 from ..file_manager import FileManager
 from ..system import DB, System
 from ..ui import UI
@@ -104,12 +103,11 @@ def _get_file_input(project: str) -> str:
     return file
 
 
-def initialize(ignore_workspace: bool, run_name: str) -> System:
+def initialize(ignore_workspace: bool) -> System:
     """Initialize the System class that the application is
     dependent on and return it.
     """
     workspace = DB(resolve_path("workspace"))
-    logs = DB(resolve_path(run_name + "logs"))
     ai = AI()
 
     project = _get_project_from_workspace(workspace)
@@ -134,8 +132,6 @@ def initialize(ignore_workspace: bool, run_name: str) -> System:
 
     system = System(
         workspace=workspace,
-        logs=logs,
-        memory=ChatMemory(),
         project=project,
         ai=ai,
     )

@@ -9,16 +9,15 @@ def _is_end_sequence(sequence: str) -> bool:
 
 def _handle_ai_question(system: System) -> str:
     """Generate a response from an AI model and return the response."""
-    chat_history = system.memory.load_messages_as_string()
-    question: str = system.ai.generate_clarifying_question(chat_history=chat_history)
-    system.memory.add_ai_message(question)
+    question = system.ai.generate_clarifying_question()
+    system.ai.add_ai_message(question)
     return question
 
 
 def _handle_user_response(system: System, ai: str) -> str:
     """Prompt the user to respond to the AI model and return the response."""
-    user: str = UI.prompt(ai)
-    system.memory.add_user_message(user)
+    user = UI.prompt(ai)
+    system.ai.add_user_message(user)
     return user
 
 

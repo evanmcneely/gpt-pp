@@ -43,4 +43,4 @@ def build_initial_prompt(system: System, ignore_workspace: bool):
 
     initial_prompt = _format_initial_prompt(prompt, file_content)
 
-    system.memory.add_user_message(initial_prompt)
+    system.ai.add_user_message(initial_prompt)

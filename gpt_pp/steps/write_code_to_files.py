@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 from halo import Halo
 
 from ..ai.templates import generate_all_code
+from ..file_utils import ValidationError
 from ..system import System
 from ..ui import UI
 
@@ -15,27 +16,24 @@ class file_operations:
 
 @Halo(text="Generating code", spinner="dots")
 def _get_code(system: System) -> Optional[List[Tuple[str, str]]]:
-    memory = system.memory
     ai = system.ai
 
-    memory.add_user_message(generate_all_code)
-    code = ai.generate_code(memory.get_messages())
+    ai.add_user_message(generate_all_code)
+    code = ai.generate_code()
 
-    memory.add_ai_message(code)
-    files = ai.get_change_operations(memory.load_messages_as_string())
+    ai.add_ai_message(code)
+    files = ai.get_change_operations()
 
     return files
 
 
 def _patch_file(system: System, path: str):
-    chat = system.memory.load_messages_as_string()
-    diff = system.ai.generate_diff(chat)
+    diff = system.ai.generate_diff(path)
     system.project.apply_patch(path, diff)
 
 
 def _create_file(system: System, path: str):
-    chat = system.memory.load_messages_as_string()
-    content = system.ai.generate_file_content(chat, path)
+    content = system.ai.generate_file_content(path)
     if content:
         system.project.create(path, content)
 
@@ -62,8 +60,12 @@ def _write_to_file_system(
 
             change_status.append((path, True, None))
 
-        except Exception as e:
+        except ValidationError as e:
             change_status.append((path, False, str(e)))  # type: ignore
+        except FileNotFoundError as e:
+            change_status.append(path, False, "no such file exists")  # type: ignore
+        except Exception as e:
+            change_status.append(path, False, f"unexpected error: {e}")  # type: ignore
 
     return change_status
 
