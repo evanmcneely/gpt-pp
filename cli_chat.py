@@ -29,10 +29,10 @@ def setup(
         chat = system.ai.get_chat(files)
 
         while True:
-            question = UI.prompt("Query")
+            question = UI.prompt("\n\nQuery")
             if question.strip().lower() == "exit":
                 break
-
+            print()  # space
             chat.predict(input=question)
 
     except Exception as e:

@@ -74,15 +74,18 @@ class AI(BaseChatMessageHistory):
         return parsers.extract_code_block(completion)
 
     def get_chat(self, files: str) -> ConversationChain:
-        memory = ConversationBufferMemory()
-        memory.save_context({"input": files})
-
-        return ConversationChain(
-            llm=self.code_llm,
-            verbose=VERBOSE,
-            memory=memory,
+        llm = get_llm(
+            Models.CODE_MODEL,
             streaming=True,
             callbacks=[StreamingStdOutCallbackHandler()],
+        )
+        memory = ConversationBufferMemory()
+        memory.save_context({"input": files}, {"output": "Ask a question."})
+
+        return ConversationChain(
+            llm=llm,
+            verbose=VERBOSE,
+            memory=memory,
         )
 
     def load_messages_as_string(self) -> str:
