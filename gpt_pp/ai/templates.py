@@ -3,7 +3,7 @@ Respond with a single question that you would need to ask to gain more clarity a
 
 Chat History: 
 {chat_history}
-"""
+"""  # noqa
 
 generate_all_code = """
 Write the code that meets the instructions. 
@@ -13,13 +13,13 @@ Start by thinking about how you are going to implement the code. Document your t
 Then write the code needed for each file. Please note that the code should be fully functional. No placeholders.
 
 Be consise, only write the code that is required to implement the changes. 
-"""
+"""  # noqa
 
 diff = """
 Generate the universal diff that would need to be applied the file at path "{file_path}" to create the changes outlined in the chat history below.
 
 {chat_history}
-"""
+"""  # noqa
 
 file_content = """
 {chat_history}
@@ -29,7 +29,7 @@ Return only the code block for this file. The code should be fully functional.
 Ensure to implement all code, if you are unsure, write a plausible implementation.
 
 Code for file {file_path}:
-"""
+"""  # noqa
 
 
 file_imports = """
@@ -38,7 +38,7 @@ Return the result as a comma separated list of file paths. Don't return anything
 If there are files imported into the files below, return the string 'nothing to import'
 
 {file}
-"""
+"""  # noqa
 
 files_requiring_changes = """
 Return a list of file paths matched with the operation ("create", "patch" or "delete") that should be applied to the file to implement the instructions.
@@ -59,4 +59,4 @@ Example output:
 
 
 {chat_history}
-"""
+"""  # noqa

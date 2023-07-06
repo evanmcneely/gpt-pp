@@ -3,7 +3,6 @@ from langchain.chat_models import ChatAnthropic, ChatOpenAI
 from config import ( # isort:skip
     ANTHROPIC_API_KEY, 
     OPENAI_API_KEY, 
-    VERBOSE,
     AnthropicAIModels,
     OpenAIModels
 )
@@ -17,7 +16,6 @@ def _get_openai(model: str, **kwargs):
         openai_api_key=OPENAI_API_KEY, 
         temperature=0, 
         model_name=model, 
-        verbose=VERBOSE, 
         **kwargs
     )
 
@@ -30,7 +28,6 @@ def _get_anthropic(model: str, **kwargs):
         anthropic_api_key=ANTHROPIC_API_KEY, 
         temperature=0, 
         model=model,
-        verbose=VERBOSE, 
         **kwargs
     )
 

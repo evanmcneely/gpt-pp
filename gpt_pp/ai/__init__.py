@@ -1,12 +1,12 @@
 from typing import Any, List, Optional, Tuple, Union
 
 from halo import Halo
-from langchain import PromptTemplate
+from langchain import LLMChain, PromptTemplate
 from langchain.chat_models.base import BaseChatModel
 from langchain.schema import BaseMessage, HumanMessage
 
 import gpt_pp.ai.parsers as parsers
-from config import Models
+from config import VERBOSE, Models
 from gpt_pp.ai import templates
 from gpt_pp.ai.llm import get_llm
 
@@ -36,52 +36,41 @@ class AI:
         else:
             return prompt
 
-    def _generate(self, prompt: PromptType) -> str:
-        prompt = self._wrap_prompt(prompt)
-        return self.code_llm(prompt).content
-
-    def _interpret(self, prompt: PromptType) -> str:
-        prompt = self._wrap_prompt(prompt)
-        return self.interpret_llm(prompt).content
-
-    def _converse(self, prompt: PromptType) -> str:
-        prompt = self._wrap_prompt(prompt)
-        return self.converse_llm(prompt).content
+    @staticmethod
+    def _run(model: BaseChatModel, prompt: PromptTemplate, **kwargs: Any) -> str:
+        chain = LLMChain(llm=model, prompt=prompt, verbose=VERBOSE)
+        result = chain.run(**kwargs)
+        return result
 
     @Halo(text="Retrieving relevant files", spinner="dots")
     def get_imported_file_paths(self, file: str) -> Optional[List[str]]:
-        prompt = self._get_prompt_from_template(templates.file_imports, file=file)
-        completion = self._interpret(prompt)
+        prompt = PromptTemplate.from_template(templates.file_imports)
+        completion = self._run(self.interpret_llm, prompt, file=file)
         return parsers.extract_files(completion)
 
     def get_change_operations(self, history: str) -> ListOfChangesType:
-        prompt = self._get_prompt_from_template(
-            templates.files_requiring_changes, chat_history=history
-        )
-        completion = self._interpret(prompt)
+        prompt = PromptTemplate.from_template(templates.files_requiring_changes)
+        completion = self._run(self.interpret_llm, prompt, chat_history=history)
         return parsers.extract_file_operations(completion)
 
     @Halo(text="Thinking", spinner="dots")
     def generate_clarifying_question(self, chat_history: str) -> str:
-        prompt = self._get_prompt_from_template(
-            templates.clarify, chat_history=chat_history
-        )
-        completion = self._converse(prompt)
+        prompt = PromptTemplate.from_template(templates.clarify)
+        completion = self._run(self.converse_llm, prompt, chat_history=chat_history)
         return completion
 
-    def generate_code(self, memory: PromptType) -> str:
-        return self._generate(memory)
+    def generate_code(self, memory: str) -> str:
+        completion = self._run(self.code_llm, memory)
+        return completion
 
     def generate_diff(self, chat_history: str) -> str:
-        prompt = self._get_prompt_from_template(
-            templates.diff, chat_history=chat_history
-        )
-        completion = self._generate(prompt)  # type: ignore
+        prompt = PromptTemplate.from_template(templates.diff)
+        completion = self._run(self.code_llm, prompt, chat_history=chat_history)
         return completion
 
     def generate_file_content(self, chat_history: str, file_path: str) -> Optional[str]:
-        prompt = self._get_prompt_from_template(
-            templates.file_content, chat_history=chat_history, file_path=file_path
+        prompt = PromptTemplate.from_template(templates.file_content)
+        completion = self._run(
+            self.code_llm, prompt, chat_history=chat_history, file_path=file_path
         )
-        completion = self._generate(prompt)  # type: ignore
         return parsers.extract_code_block(completion)
