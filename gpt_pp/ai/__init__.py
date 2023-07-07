@@ -1,7 +1,7 @@
 from typing import Any, List, Optional, Tuple, Union
 
 from halo import Halo
-from langchain import LLMChain, PromptTemplate
+from langchain import LLMChain, PromptTemplate, SequentialChain
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.chains import ConversationChain
 from langchain.chat_models.base import BaseChatModel
@@ -26,6 +26,11 @@ class AI(BaseChatMessageHistory):
         self.code_llm = get_llm(Models.CODE_MODEL)
         self.interpret_llm = get_llm(Models.INTERPRETATION_MODEL)
         self.converse_llm = get_llm(Models.CONVERSATION_MODEL)
+        self.streaming_llm = get_llm(
+            Models.CODE_MODEL,
+            streaming=True,
+            callbacks=[StreamingStdOutCallbackHandler()],
+        )
 
     @staticmethod
     def _run(model: BaseChatModel, prompt: PromptTemplate, **kwargs: Any) -> str:
@@ -74,19 +79,31 @@ class AI(BaseChatMessageHistory):
         return parsers.extract_code_block(completion)
 
     def get_chat(self, files: str) -> ConversationChain:
-        llm = get_llm(
-            Models.CODE_MODEL,
-            streaming=True,
-            callbacks=[StreamingStdOutCallbackHandler()],
-        )
         memory = ConversationBufferMemory()
         memory.save_context({"input": files}, {"output": "Ask a question."})
 
         return ConversationChain(
-            llm=llm,
+            llm=self.streaming_llm,
             verbose=VERBOSE,
             memory=memory,
         )
+
+    def generate_review_notes(self, details: str, diff: str) -> str:
+        prompt = PromptTemplate.from_template(templates.create_review_notes)
+        completion = self._run(
+            self.streaming_llm, prompt, pr_details=details, pr_diff=diff
+        )
+        return completion
+
+    def generate_pr_post_request_body(self, details: str, review_notes: str) -> str:
+        prompt = PromptTemplate.from_template(templates.format_review_post_request)
+        completion = self._run(
+            self.interpret_llm,
+            prompt,
+            pr_details=details,
+            review_notes=review_notes,
+        )
+        return completion
 
     def load_messages_as_string(self) -> str:
         """Convert chat messages to a string and return it."""

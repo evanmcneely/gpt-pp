@@ -1,58 +1,52 @@
 import requests
+from halo import Halo
 
 from config import GITHUB_ACCESS_TOKEN
 
-GITHUB_AUTH_HEADERS = {
+GITHUB_HEADERS = {
+    "Accept: application/vnd.github+json"
     "Authorization": f"Bearer {GITHUB_ACCESS_TOKEN}",
-}
-
-GITHUB_DIFF_HEADERS = {
-    **GITHUB_AUTH_HEADERS,
-    "Accept": "application/vnd.github.diff",
     "X-GitHub-Api-Version": "2022-11-28",
 }
 
-query = """query ($repo: String!, $owner: String!, $number: Int!) {
-repository(owner: $owner, name: $repo) {
-    pullRequests(number: $number) {
-      edges {
-        node {
-            number
-            body
-            author {
-                login
-            }
-            title
-            body
-            url
-        }
-      }
-    }
-  }
-}"""
+GITHUB_DIFF_HEADERS = {
+    **GITHUB_HEADERS,
+    "Accept": "application/vnd.github.diff",
+}
 
 
-def _run_details_query(repo: str, owner: str, number: int) -> dict:
-    request = requests.post(
-        "https://api.github.com/graphql",
-        json={
-            "query": query,
-            "variables": {"repo": repo, "owner": owner, "number": number},
-        },
-        headers=GITHUB_AUTH_HEADERS,
+def _format_pr_url(owner: str, repo: str, number: int) -> str:
+    return f"https://api.github.com/{owner}/{repo}/pulls/{number}"
+
+
+def _run_details_query(owner: str, repo: str, number: int) -> dict:
+    request = requests.get(
+        _format_pr_url(owner, repo, number),
+        headers=GITHUB_HEADERS,
     )
     if request.status_code == 200:
         return request.json()
     else:
         raise Exception(
             "Query failed to run by returning code of {}. {}".format(
-                request.status_code, query
+                request.status_code, _format_pr_url(owner, repo, number)
             )
         )
 
 
-def _run_diff_query(repo: str, owner: str, number: int) -> str:
-    return ""
+def _run_diff_query(owner: str, repo: str, number: int) -> str:
+    request = requests.get(
+        _format_pr_url(owner, repo, number),
+        headers=GITHUB_DIFF_HEADERS,
+    )
+    if request.status_code == 200:
+        return request.text
+    else:
+        raise Exception(
+            "Query failed to run by returning code of {}. {}".format(
+                request.status_code, _format_pr_url(owner, repo, number)
+            )
+        )
 
 
 def _format_PR_details(pull_request: dict) -> str:
@@ -70,8 +64,9 @@ def _format_PR_details(pull_request: dict) -> str:
     return formatted_data
 
 
-def get_pr_details(repo: str, owner: str, number: int) -> tuple(str, str):
-    pull_request_details = _run_details_query(repo, owner, number)
-    pull_request_diff = _run_diff_query(repo, owner, number)
+@Halo(text="Retrieveing PR details from Github", spinner="dots")
+def get_pr_details(owner: str, repo: str, number: int) -> tuple(str, str):
+    pull_request_details = _run_details_query(owner, repo, number)
+    pull_request_diff = _run_diff_query(owner, repo, number)
 
     return (_format_PR_details(pull_request_details), pull_request_diff)

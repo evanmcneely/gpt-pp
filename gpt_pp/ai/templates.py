@@ -98,7 +98,7 @@ Overall: <leave overall thoughts like a pirate about the changes being proposed 
 
 Begin!"""  # noqa
 
-format_review_post_request = """Generate the full API url and request body to POST the pull request review to github. Format your response as a '||' separated string of '<url>||<data>' where 'url' is the complete url string to post the data too and 'data' is the request body as a JSON blob.
+format_review_post_request = """Generate the request body to POST the pull request review to github. Format your response as a JSON blob.
 
 API Docs:
 **Create a Review Comment for a Pull Request**: 
@@ -133,6 +133,6 @@ Review Notes:
 {review_notes}
 ----
 
-Remember to format your response as a '||' separated string of '<url>||<data>' where 'url' is the complete url string to post the data too and 'data' is the request body as a JSON blob.
+Remember to format your response as a JSON blob.
 
 API url and data:"""  # noqa
