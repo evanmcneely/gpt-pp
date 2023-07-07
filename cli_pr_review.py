@@ -1,7 +1,7 @@
 import typer
 from typing_extensions import Annotated
 
-from gpt_pp.steps import get_PR_details
+from gpt_pp.steps import get_pr_details
 from gpt_pp.ui import UI
 
 app = typer.Typer()
@@ -38,7 +38,7 @@ def setup(
         6. post to github
         """
 
-        details, diff = get_PR_details(org, repo, pr_number)
+        details, diff = get_pr_details(org, repo, pr_number)
     except Exception as e:
         UI.error(str(e))
 
