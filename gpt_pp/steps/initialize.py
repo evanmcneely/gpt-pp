@@ -16,7 +16,7 @@ from ..file_utils import (  # isort:skip
 )
 
 
-def _check_if_project_is_valid(project: str) -> bool:
+def _check_if_project_is_valid(project: Path) -> bool:
     try:
         validate_directory_path(project)
         return True
@@ -24,15 +24,7 @@ def _check_if_project_is_valid(project: str) -> bool:
         return False
 
 
-# def _check_if_path_is_valid(file: str) -> bool:
-#     try:
-#         validate_file_path(file)
-#         return True
-#     except ValidationError or FileNotFoundError:
-#         return False
-
-
-def _get_project_from_input() -> str:
+def _get_project_from_input() -> Path:
     """Prompt the user to enter a path to a project directory. Validate
     the project path and repeat until a valid path is entered.
     """
@@ -41,9 +33,10 @@ def _get_project_from_input() -> str:
             "Enter the relative path to the project directory you would like to work in"
         )
         project = sanitize_input(project)
+        project = Path(project)
 
         try:
-            abs_path = resolve_path(project)
+            abs_path = project.absolute()
             validate_directory_path(abs_path)
             break
 
@@ -81,18 +74,18 @@ def initialize(project_path: Path) -> System:
     dependent on and return it.
     """
     project_path_string = str(project_path)
-    project_valid = _check_if_project_is_valid(project_path_string)
+    project_valid = _check_if_project_is_valid(project_path)
 
     if not project_valid:
         UI.message(f"{project_path_string} not valid")
-        project_path_string = _get_project_from_input()
+        project_path = _get_project_from_input()
 
     directory_empty = is_directory_empty(project_path)
 
     if not directory_empty:
         file = _get_file_from_input(project_path_string)
 
-    project = FileManager(project_path_string)
+    project = FileManager(str(project_path))
     project.add(file)  # type:ignore
 
     system = System(
