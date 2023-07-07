@@ -1,4 +1,5 @@
-from ..file_utils import ValidationError, sanitize_input
+from pathlib import Path
+from ..file_utils import sanitize_input
 from ..system import System
 from ..ui import UI
 
@@ -9,6 +10,7 @@ def retrieve_files(system: System):
     or paths exist.
     """
     files_loaded = system.project.num_files()
+    print("Number of files loaded:", files_loaded)
     if files_loaded == 0:
         return None
 
@@ -19,11 +21,9 @@ def retrieve_files(system: System):
 
     UI.message("Adding files to context")
     for path in file_paths:
-        try:
-            path = sanitize_input(path)
-            system.project.add(path)
-            UI.success(path)
-        except ValidationError as e:
-            UI.fail(f"{path} - {str(e)}")
-        except FileNotFoundError as e:
-            UI.fail(f"{path} - no such file exists")
+        path = Path(sanitize_input(path))
+        success = system.project.add(path)
+        if success:
+            UI.success(str(path))
+        else:
+            UI.fail(str(path))

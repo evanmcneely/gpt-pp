@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import typer
 from typing_extensions import Annotated
@@ -32,10 +32,10 @@ def setup(
             resolve_path=False,
         ),
     ],
-    # files: Annotated[
-    #     Optional[List[Path]],
-    #     typer.Argument(help="File paths from the project root directory"),
-    # ] = None,
+    file: Annotated[
+        Optional[Path],
+        typer.Argument(help="File paths from the project root directory"),
+    ] = None,
     imports: Annotated[
         bool,
         typer.Option(
@@ -44,7 +44,7 @@ def setup(
     ] = True,
 ):
     try:
-        system = initialize(str(project))
+        system = initialize(project, file)
 
         if imports:
             retrieve_files(system)
