@@ -44,7 +44,6 @@ def setup(
     ] = True,
 ):
     try:
-        print(imports)
         system = initialize(project, file)
 
         if imports:

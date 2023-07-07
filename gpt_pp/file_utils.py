@@ -79,33 +79,33 @@ def _is_pathname_valid(path: str) -> bool:
         return True
 
 
-def with_permissions(func):
-    """Wrap a function and change the permissions of a file at the
-    specified path and change the permissions back afterwards.
-    """
+# def with_permissions(func):
+#     """Wrap a function and change the permissions of a file at the
+#     specified path and change the permissions back afterwards.
+#     """
 
-    def _change_permissions(path: Path, permissions=0o777) -> None:
-        """Change the permissions of the file at the given path."""
-        try:
-            path.chmod(permissions)
-        except Exception:
-            # ignore
-            pass
+#     def _change_permissions(path: Path, permissions=0o777) -> None:
+#         """Change the permissions of the file at the given path."""
+#         try:
+#             path.chmod(permissions)
+#         except Exception:
+#             # ignore
+#             pass
 
-    @functools.wraps(func)
-    def wrapper(path: Path, *args, **kwargs):
-        mode = path.stat().st_mode
+#     @functools.wraps(func)
+#     def wrapper(path: Path, *args, **kwargs):
+#         mode = path.stat().st_mode
 
-        _change_permissions(path)  # change to write
-        result = func(path, *args, **kwargs)
-        _change_permissions(path, permissions=mode)  # change back
+#         _change_permissions(path)  # change to write
+#         result = func(path, *args, **kwargs)
+#         _change_permissions(path, permissions=mode)  # change back
 
-        return result
+#         return result
 
-    return wrapper
+#     return wrapper
 
 
-@with_permissions
+# @with_permissions
 def _path_exists(path: Path) -> bool:
     """`True` if the given path exists; `False` otherwise."""
     try:
@@ -114,7 +114,7 @@ def _path_exists(path: Path) -> bool:
         return False
 
 
-@with_permissions
+# @with_permissions
 def _is_dir(path: Path) -> bool:
     """`True` if the given path is a directory; `False` otherwise."""
     try:
@@ -123,7 +123,7 @@ def _is_dir(path: Path) -> bool:
         return False
 
 
-@with_permissions
+# @with_permissions
 def _is_file(path: Path) -> bool:
     """`True` if the given path is a file; `False` otherwise."""
     try:

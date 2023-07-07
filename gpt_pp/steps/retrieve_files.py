@@ -10,7 +10,6 @@ def retrieve_files(system: System):
     or paths exist.
     """
     files_loaded = system.project.num_files()
-    print("Number of files loaded:", files_loaded)
     if files_loaded == 0:
         return None
 
