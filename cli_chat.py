@@ -44,7 +44,7 @@ def setup(
     ] = True,
 ):
     try:
-        system = initialize(str(project))
+        system = initialize(project)
 
         if imports:
             retrieve_files(system)

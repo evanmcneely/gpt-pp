@@ -2,6 +2,7 @@ import errno
 import functools
 import os
 import sys
+from pathlib import Path
 from typing import Any
 
 from .ui import UI
@@ -162,12 +163,14 @@ def _is_parent_directory_valid(dir_path: str) -> bool:
 
 
 @with_permissions
-def is_directory_empty(path: str) -> bool:
+def is_directory_empty(path: Path) -> bool:
     """Determine if a given directory is empty or not."""
     try:
-        contents = os.listdir(path)
+        contents = path.iterdir()
         filtered_contents = [
-            f for f in contents if not f.startswith(".") and not f.startswith("..")
+            f
+            for f in contents
+            if not str(f).startswith(".") and not str(f).startswith("..")
         ]
         return len(filtered_contents) == 0
     except Exception as e:

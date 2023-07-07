@@ -32,7 +32,7 @@ def _check_if_project_is_valid(project: str) -> bool:
 #         return False
 
 
-def _get_project_input() -> str:
+def _get_project_from_input() -> str:
     """Prompt the user to enter a path to a project directory. Validate
     the project path and repeat until a valid path is entered.
     """
@@ -55,7 +55,7 @@ def _get_project_input() -> str:
     return project
 
 
-def _get_file_input(project: str) -> str:
+def _get_file_from_input(project: str) -> str:
     """Prompt the user to enter a path to a file within the project directory.
     Validate the file path and repeat until a valid path is entered.
     """
@@ -76,25 +76,23 @@ def _get_file_input(project: str) -> str:
     return file
 
 
-def initialize(project_path: str) -> System:
+def initialize(project_path: Path) -> System:
     """Initialize the System class that the application is
     dependent on and return it.
     """
-    project_path = str(project_path)
-    project_valid = _check_if_project_is_valid(project_path)
+    project_path_string = str(project_path)
+    project_valid = _check_if_project_is_valid(project_path_string)
 
     if not project_valid:
-        UI.message(f"{project_path} not valid")
-        project_path = _get_project_input()
-    else:
-        UI.message(f"Using project {project_path}")
+        UI.message(f"{project_path_string} not valid")
+        project_path_string = _get_project_from_input()
 
-    directory_empty = is_directory_empty(resolve_path(project_path))
+    directory_empty = is_directory_empty(project_path)
 
     if not directory_empty:
-        file = _get_file_input(project_path)
+        file = _get_file_from_input(project_path_string)
 
-    project = FileManager(project_path)
+    project = FileManager(project_path_string)
     project.add(file)  # type:ignore
 
     system = System(
