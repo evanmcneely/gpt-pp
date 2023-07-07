@@ -1,12 +1,12 @@
+from pathlib import Path
 from typing import Optional
 
 from ..ai import AI
 from ..file_manager import FileManager
-from ..system import DB, System
+from ..system import System
 from ..ui import UI
 
 from ..file_utils import (  # isort:skip
-    ValidationError,
     is_directory_empty,
     resolve_path,
     sanitize_input,
@@ -15,51 +15,7 @@ from ..file_utils import (  # isort:skip
 )
 
 
-def _get_project_from_workspace(workspace: DB) -> Optional[str]:
-    """Get the project path from the workspace directory, validate the
-    path and return it. Return none if an error occurs while retrieving the
-    file or validating the path.
-    """
-    try:
-        project = sanitize_input(workspace["project"])
-        if not project:
-            return None
-
-        abs_path = resolve_path(project)
-        validate_directory_path(abs_path)
-
-    except ValidationError:
-        UI.error("Cannot use workspace project path")
-        project = None
-    except FileNotFoundError:
-        project = None
-
-    return project
-
-
-def _get_file_from_workspace(workspace: DB, project: str) -> Optional[str]:
-    """Get the file path from the workspace directory, validate the
-    path and return it. Return none if an error occurs while retrieving the
-    file or validating the path.
-    """
-    try:
-        file = sanitize_input(workspace["file"])
-        if not file:
-            return None
-
-        abs_path = resolve_path(project, file)
-        validate_file_path(abs_path)
-
-    except ValidationError:
-        UI.error("Cannot use workspace file path")
-        file = None
-    except FileNotFoundError:
-        file = None
-
-    return file
-
-
-def _get_project_input() -> str:
+def _get_project_from_input() -> Path:
     """Prompt the user to enter a path to a project directory. Validate
     the project path and repeat until a valid path is entered.
     """
@@ -67,22 +23,17 @@ def _get_project_input() -> str:
         project = UI.prompt(
             "Enter the relative path to the project directory you would like to work in"
         )
-        project = sanitize_input(project)
+        project = Path(sanitize_input(project))
+        abs_path = resolve_path(project)
 
-        try:
-            abs_path = resolve_path(project)
-            validate_directory_path(abs_path)
+        valid = validate_directory_path(abs_path, warn=True)
+        if valid:
             break
-
-        except ValidationError:
-            UI.error(f"Invalid path: {project}")
-        except FileNotFoundError:
-            UI.error(f"Directory not found: {project}")
 
     return project
 
 
-def _get_file_input(project: str) -> str:
+def _get_file_from_input(project: Path) -> Path:
     """Prompt the user to enter a path to a file within the project directory.
     Validate the file path and repeat until a valid path is entered.
     """
@@ -90,50 +41,56 @@ def _get_file_input(project: str) -> str:
         file = UI.prompt(
             "Enter the relative path to the file you would like to work in"
         )
-        file = sanitize_input(file)
-        try:
-            path = resolve_path(project, file)
-            validate_file_path(path)
+        file = Path(sanitize_input(file))
+        path = resolve_path(project, file)
+
+        valid = validate_file_path(path, warn=True)
+        if valid:
             break
-        except ValidationError:
-            UI.error(f"Invalid path: {file}")
-        except FileNotFoundError:
-            UI.error(f"File not found: {file}")
 
     return file
 
 
-def initialize(ignore_workspace: bool) -> System:
+def _finalize_project_path(project: Path) -> Path:
+    """Finalize the project path and return it."""
+    abs_path = resolve_path(project)
+    project_valid = validate_directory_path(abs_path, warn=True)
+    if not project_valid:
+        project = _get_project_from_input()
+
+    return project
+
+
+def _finalize_file_path(project: Path, file: Optional[Path]) -> Optional[Path]:
+    """Finalize the file path and return it."""
+    directory_empty = is_directory_empty(project)
+
+    if not directory_empty:
+        if file:
+            abs_path = resolve_path(project, file)
+            success = validate_file_path(abs_path, warn=True)
+            if not success:
+                file = _get_file_from_input(project)
+        else:
+            file = _get_file_from_input(project)
+
+    return file
+
+
+def initialize(project_path: Path, file_path: Optional[Path]) -> System:
     """Initialize the System class that the application is
     dependent on and return it.
     """
-    workspace = DB(resolve_path("workspace"))
-    ai = AI()
+    project_path = _finalize_project_path(project_path)
+    project = FileManager(project_path)
 
-    project = _get_project_from_workspace(workspace)
-    if not project or ignore_workspace:
-        project = _get_project_input()
-    else:
-        UI.message(f"Using project {project}")
-
-    directory_empty = is_directory_empty(resolve_path(project))
-
-    file = None
-    if not directory_empty:
-        file = _get_file_from_workspace(workspace, project)
-        if not file or ignore_workspace:
-            file = _get_file_input(project)
-        else:
-            UI.message(f"Using file {file}")
-
-    project = FileManager(project)
-    if file:
-        project.add(file)
+    file_path = _finalize_file_path(project_path, file_path)
+    if file_path:
+        project.add(file_path)
 
     system = System(
-        workspace=workspace,
         project=project,
-        ai=ai,
+        ai=AI(),
     )
 
     return system

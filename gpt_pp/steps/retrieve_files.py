@@ -1,6 +1,18 @@
-from ..file_utils import ValidationError, sanitize_input
+from pathlib import Path
+from typing import List
+
 from ..system import System
 from ..ui import UI
+
+
+def _get_imported_file_paths(system: System) -> List[str]:
+    """Generate imported file paths and filter the paths already
+    added from the list.
+    """
+    seed_file = system.project.get_all_file_content()
+    file_paths = system.ai.get_imported_file_paths(seed_file)
+
+    return list(filter(system.project.already_added, file_paths or []))
 
 
 def retrieve_files(system: System):
@@ -8,22 +20,21 @@ def retrieve_files(system: System):
     FileManager. Add the paths to the FileManager or return early if no files
     or paths exist.
     """
-    files_loaded = system.project.num_files()
-    if files_loaded == 0:
+    if system.project.num_files() == 0:
+        # no file content
         return None
 
-    seed_file = system.project.get_all_file_content()
-    file_paths = system.ai.get_imported_file_paths(seed_file)
-    if not file_paths:
+    file_paths = _get_imported_file_paths(system)
+
+    if len(file_paths) == 0:
+        # no imported file paths
         return None
 
     UI.message("Adding files to context")
     for path in file_paths:
-        try:
-            path = sanitize_input(path)
-            system.project.add(path)
-            UI.success(path)
-        except ValidationError as e:
-            UI.fail(f"{path} - {str(e)}")
-        except FileNotFoundError as e:
-            UI.fail(f"{path} - no such file exists")
+        path = Path(path)
+        success = system.project.add(path)
+        if success:
+            UI.success(str(path))
+        else:
+            UI.fail(str(path))

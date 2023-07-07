@@ -3,7 +3,6 @@ from typing import List, Optional, Tuple
 from halo import Halo
 
 from ..ai.templates import generate_all_code
-from ..file_utils import ValidationError
 from ..system import System
 from ..ui import UI
 
@@ -41,31 +40,23 @@ def _create_file(system: System, path: str):
 @Halo(text="Updating files", spinner="dots")
 def _write_to_file_system(
     system: System, changes: List[Tuple[str, str]]
-) -> List[Tuple[str, bool, Optional[str]]]:
+) -> List[Tuple[str, bool]]:
     change_status = []
 
     for file in changes:
-        try:
-            path = file[0]
-            operation = file[1]
+        path = file[0]
+        operation = file[1]
 
-            if operation == file_operations.DELETE:
-                system.project.delete(path)
-            elif operation == file_operations.PATCH:
-                _patch_file(system, path)
-            elif operation == file_operations.CREATE:
-                _create_file(system, path)
-            else:
-                raise Exception("Failed to generate file content")
+        success = False
+        if operation == file_operations.DELETE:
+            system.project.delete(path)
+            success = True
+        elif operation == file_operations.PATCH:
+            success = _patch_file(system, path)
+        elif operation == file_operations.CREATE:
+            success = _create_file(system, path)
 
-            change_status.append((path, True, None))
-
-        except ValidationError as e:
-            change_status.append((path, False, str(e)))  # type: ignore
-        except FileNotFoundError as e:
-            change_status.append(path, False, "no such file exists")  # type: ignore
-        except Exception as e:
-            change_status.append(path, False, f"unexpected error: {e}")  # type: ignore
+        change_status.append((path, success))
 
     return change_status
 
@@ -79,8 +70,8 @@ def write_code_to_files(system: System):
         return None
     change_status = _write_to_file_system(system, required_changes)
 
-    for path, status, message in change_status:
+    for path, status in change_status:
         if status:
             UI.success(path)
         else:
-            UI.fail(f"{path} - {message}")
+            UI.fail(path)

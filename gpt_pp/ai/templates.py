@@ -33,9 +33,9 @@ Code for file {file_path}:
 
 
 file_imports = """
-Determine the paths to all the files imported into the files below from the project root directory with the correct file extension. File paths should start with "./". 
+Determine the paths to all the files imported into the files below from the project root directory with the correct file extension. File paths should start with "./". Don't include the path to the files provided.
 Return the result as a comma separated list of file paths. Don't return anything else, just the file paths. 
-If there are files imported into the files below, return the string 'nothing to import'
+If there are no files imported into the file below, return the string 'nothing to import'
 
 {file}
 """  # noqa
