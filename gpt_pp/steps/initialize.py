@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from ..ai import AI
 from ..file_manager import FileManager
@@ -51,24 +51,40 @@ def _get_file_from_input(project: Path) -> Path:
     return file
 
 
+def _finalize_project_path(project: Path) -> Path:
+    abs_path = resolve_path(project)
+    project_valid = validate_directory_path(abs_path, warn=True)
+    if not project_valid:
+        project = _get_project_from_input()
+
+    return project
+
+
+def _finalize_file_path(project: Path, file: Optional[Path]) -> Optional[Path]:
+    directory_empty = is_directory_empty(project)
+
+    if not directory_empty:
+        if file:
+            abs_path = resolve_path(project, file)
+            success = validate_file_path(abs_path, warn=True)
+            if not success:
+                file = _get_file_from_input(project)
+        else:
+            file = _get_file_from_input(project)
+
+    return file
+
+
 def initialize(project_path: Path, file_path: Optional[Path]) -> System:
     """Initialize the System class that the application is
     dependent on and return it.
     """
-    project_valid = validate_directory_path(project_path, warn=True)
-    if not project_valid:
-        project_path = _get_project_from_input()
-
+    project_path = _finalize_project_path(project_path)
     project = FileManager(project_path)
 
-    directory_empty = is_directory_empty(project_path)
-
-    if not directory_empty:
-        if file_path:
-            success = project.add(file_path)
-            if not success:
-                file_path = _get_file_from_input(project_path)
-                project.add(file_path)
+    file_path = _finalize_file_path(project_path, file_path)
+    if file_path:
+        project.add(file_path)
 
     system = System(
         project=project,

@@ -34,8 +34,14 @@ class FileManager:
         else:
             return None
 
+    def already_added(self, path_name: str) -> bool:
+        return path_name in self.file_paths
+
     def add(self, path: Path) -> Optional[Path]:
         """Adds a new file to the FileManager's dictionary of files."""
+        if self.already_added(str(path)):
+            return None
+
         absolute_file_path = self.absolute_path / path
         valid = validate_file_path(absolute_file_path)
 

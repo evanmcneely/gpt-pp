@@ -1,6 +1,8 @@
 import re
 from typing import List, Optional, Tuple
 
+from ..file_utils import sanitize_path
+
 
 def extract_file_operations(content: str) -> Optional[List[Tuple[str, str]]]:
     """Parse an AI models completion string into format represting the paths
@@ -29,6 +31,7 @@ def extract_code_block(code_block: str) -> Optional[str]:
     else:
         return None
 
+
 def extract_files(content: str) -> Optional[List[str]]:
     """Parse an AI models completion string into either a list of
     strings, split on the occurrence of a comma, or None if the
@@ -37,5 +40,4 @@ def extract_files(content: str) -> Optional[List[str]]:
     if content.strip(" \n").lower() == "nothing to import":
         return None
 
-    return content.split(",")
-
+    return [sanitize_path(p) for p in content.split(",")]

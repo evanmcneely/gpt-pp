@@ -1,7 +1,15 @@
 from pathlib import Path
-from ..file_utils import sanitize_input
+from typing import List
+
 from ..system import System
 from ..ui import UI
+
+
+def _get_imported_file_paths(system: System) -> List[str]:
+    seed_file = system.project.get_all_file_content()
+    file_paths = system.ai.get_imported_file_paths(seed_file)
+
+    return list(filter(system.project.already_added, file_paths or []))
 
 
 def retrieve_files(system: System):
@@ -9,18 +17,19 @@ def retrieve_files(system: System):
     FileManager. Add the paths to the FileManager or return early if no files
     or paths exist.
     """
-    files_loaded = system.project.num_files()
-    if files_loaded == 0:
+    if system.project.num_files() == 0:
+        # no file content
         return None
 
-    seed_file = system.project.get_all_file_content()
-    file_paths = system.ai.get_imported_file_paths(seed_file)
-    if not file_paths:
+    file_paths = _get_imported_file_paths(system)
+
+    if len(file_paths) == 0:
+        # on imported file paths
         return None
 
     UI.message("Adding files to context")
     for path in file_paths:
-        path = Path(sanitize_input(path))
+        path = Path(path)
         success = system.project.add(path)
         if success:
             UI.success(str(path))

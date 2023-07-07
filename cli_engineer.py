@@ -24,12 +24,6 @@ def setup(
         Path,
         typer.Argument(
             help="Path to the project directory to work with",
-            exists=True,
-            file_okay=False,
-            dir_okay=True,
-            writable=True,
-            readable=True,
-            resolve_path=False,
         ),
     ],
     file: Annotated[

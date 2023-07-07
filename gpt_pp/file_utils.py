@@ -79,33 +79,33 @@ def _is_pathname_valid(path: str) -> bool:
         return True
 
 
-# def with_permissions(func):
-#     """Wrap a function and change the permissions of a file at the
-#     specified path and change the permissions back afterwards.
-#     """
+def with_permissions(func):
+    """Wrap a function and change the permissions of a file at the
+    specified path and change the permissions back afterwards.
+    """
 
-#     def _change_permissions(path: Path, permissions=0o777) -> None:
-#         """Change the permissions of the file at the given path."""
-#         try:
-#             path.chmod(permissions)
-#         except Exception:
-#             # ignore
-#             pass
+    def _change_permissions(path: Path, permissions=0o777) -> None:
+        """Change the permissions of the file at the given path."""
+        try:
+            path.chmod(permissions)
+        except Exception:
+            # ignore
+            pass
 
-#     @functools.wraps(func)
-#     def wrapper(path: Path, *args, **kwargs):
-#         mode = path.stat().st_mode
+    @functools.wraps(func)
+    def wrapper(path: Path, *args, **kwargs):
+        mode = path.stat().st_mode
 
-#         _change_permissions(path)  # change to write
-#         result = func(path, *args, **kwargs)
-#         _change_permissions(path, permissions=mode)  # change back
+        _change_permissions(path)  # change to write
+        result = func(path, *args, **kwargs)
+        _change_permissions(path, permissions=mode)  # change back
 
-#         return result
+        return result
 
-#     return wrapper
+    return wrapper
 
 
-# @with_permissions
+@with_permissions
 def _path_exists(path: Path) -> bool:
     """`True` if the given path exists; `False` otherwise."""
     try:
@@ -178,25 +178,24 @@ def validate_file_path(path: Path, warn: bool = False) -> bool:
     try:
         if not _is_file_extension_valid(absolute_path):
             raise ValidationError("Invalid file extension")
-
         if not _is_parent_directory_valid(absolute_path):
             raise ValidationError("Invalid directory in path")
-
         if not _is_pathname_valid(str(absolute_path)):
             raise ValidationError("Path is not valid")
-
         if not _path_exists(absolute_path):
             raise FileNotFoundError("Path does not exist")
-
         if not _is_file(absolute_path):
             raise ValidationError("Path is not a file")
+
     except FileNotFoundError or ValidationError as e:
         if warn:
             UI.error(f"{e} - {path}")
         return False
+
     except Exception as e:
         UI.error(f"Error validating file")
         raise
+
     else: 
         return True
 
@@ -209,22 +208,22 @@ def validate_directory_path(path: Path, warn: bool = False) -> bool:
     try:
         if not _is_parent_directory_valid(absolute_path):
             raise ValidationError("Invalid directory in path")
-
         if not _is_pathname_valid(str(absolute_path)):
             raise ValidationError("Path is not valid")
-
         if not _path_exists(absolute_path):
             raise ValidationError("Path does not exist")
-
         if not _is_dir(absolute_path):
             raise ValidationError("Path is not a directory")
+
     except FileNotFoundError or ValidationError as e:
         if warn:
             UI.error(f"{e} - {path}")
         return False
+
     except Exception as e:
         UI.error(f"Error validating directory")
         raise
+
     else:
         return True
 
