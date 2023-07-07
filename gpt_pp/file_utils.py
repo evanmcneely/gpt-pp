@@ -1,9 +1,9 @@
 import errno
 import functools
 import os
+import re
 import sys
 from pathlib import Path
-import re
 
 from .ui import UI
 
@@ -43,6 +43,32 @@ def sanitize_input(input: str) -> str:
     return sanitize_path(input)
 
 
+def with_permissions(func):
+    """Wrap a function and change the permissions of a file at the
+    specified path and change the permissions back afterwards.
+    """
+
+    def _change_permissions(path: Path, permissions=0o777) -> None:
+        """Change the permissions of the file at the given path."""
+        try:
+            path.chmod(permissions)
+        except Exception:
+            # ignore
+            pass
+
+    @functools.wraps(func)
+    def wrapper(path: Path, *args, **kwargs):
+        mode = path.stat().st_mode
+
+        _change_permissions(path)  # change to write
+        result = func(path, *args, **kwargs)
+        _change_permissions(path, permissions=mode)  # change back
+
+        return result
+
+    return wrapper
+
+
 # see https://stackoverflow.com/questions/9532499/check-whether-a-path-is-valid-in-python-without-creating-a-file-at-the-paths-ta
 def _is_pathname_valid(path: str) -> bool:
     """`True` if the passed pathname is a valid pathname for the current OS;
@@ -79,30 +105,14 @@ def _is_pathname_valid(path: str) -> bool:
         return True
 
 
-def with_permissions(func):
-    """Wrap a function and change the permissions of a file at the
-    specified path and change the permissions back afterwards.
+@with_permissions
+def is_path_creatable(pathname: str) -> bool:
     """
-
-    def _change_permissions(path: Path, permissions=0o777) -> None:
-        """Change the permissions of the file at the given path."""
-        try:
-            path.chmod(permissions)
-        except Exception:
-            # ignore
-            pass
-
-    @functools.wraps(func)
-    def wrapper(path: Path, *args, **kwargs):
-        mode = path.stat().st_mode
-
-        _change_permissions(path)  # change to write
-        result = func(path, *args, **kwargs)
-        _change_permissions(path, permissions=mode)  # change back
-
-        return result
-
-    return wrapper
+    `True` if the current user has sufficient permissions to create the passed
+    pathname; `False` otherwise.
+    """
+    dirname = os.path.dirname(pathname) or os.getcwd()
+    return os.access(dirname, os.W_OK)
 
 
 @with_permissions
@@ -114,7 +124,7 @@ def _path_exists(path: Path) -> bool:
         return False
 
 
-# @with_permissions
+@with_permissions
 def _is_dir(path: Path) -> bool:
     """`True` if the given path is a directory; `False` otherwise."""
     try:
@@ -123,7 +133,7 @@ def _is_dir(path: Path) -> bool:
         return False
 
 
-# @with_permissions
+@with_permissions
 def _is_file(path: Path) -> bool:
     """`True` if the given path is a file; `False` otherwise."""
     try:
@@ -159,13 +169,13 @@ def _is_parent_directory_valid(dir_path: Path) -> bool:
 def is_directory_empty(path: Path) -> bool:
     """Determine if a given directory is empty or not."""
     directory = path.iterdir()
-    
+
     count = 0
     for file in directory:
-        f = file.name 
+        f = file.name
         if not str(f).startswith(".") and not str(f).startswith(".."):
             count += 1
-    
+
     return count == 0
 
 
@@ -196,8 +206,9 @@ def validate_file_path(path: Path, warn: bool = False) -> bool:
         UI.error(f"Error validating file")
         raise
 
-    else: 
+    else:
         return True
+
 
 def validate_directory_path(path: Path, warn: bool = False) -> bool:
     """Validate that a directory path contains no disallowed file extensions

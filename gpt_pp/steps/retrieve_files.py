@@ -6,6 +6,9 @@ from ..ui import UI
 
 
 def _get_imported_file_paths(system: System) -> List[str]:
+    """Generate imported file paths and filter the paths already
+    added from the list.
+    """
     seed_file = system.project.get_all_file_content()
     file_paths = system.ai.get_imported_file_paths(seed_file)
 
@@ -24,7 +27,7 @@ def retrieve_files(system: System):
     file_paths = _get_imported_file_paths(system)
 
     if len(file_paths) == 0:
-        # on imported file paths
+        # no imported file paths
         return None
 
     UI.message("Adding files to context")

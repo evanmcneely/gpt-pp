@@ -52,6 +52,7 @@ def _get_file_from_input(project: Path) -> Path:
 
 
 def _finalize_project_path(project: Path) -> Path:
+    """Finalize the project path and return it."""
     abs_path = resolve_path(project)
     project_valid = validate_directory_path(abs_path, warn=True)
     if not project_valid:
@@ -61,6 +62,7 @@ def _finalize_project_path(project: Path) -> Path:
 
 
 def _finalize_file_path(project: Path, file: Optional[Path]) -> Optional[Path]:
+    """Finalize the file path and return it."""
     directory_empty = is_directory_empty(project)
 
     if not directory_empty:

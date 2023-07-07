@@ -2,7 +2,11 @@ import os
 from pathlib import Path
 from typing import Dict, Optional
 
-from gpt_pp.file_utils import apply_diff_patch, validate_file_path
+from gpt_pp.file_utils import (  # isort:skip
+    apply_diff_patch,
+    is_path_creatable,
+    validate_file_path,
+)
 
 
 class FileManager:
@@ -11,7 +15,7 @@ class FileManager:
     file_paths: Dict[str, Path]
     path: Path  # path to the project from cwd
     absolute_path: Path  # absolute path to the project
-    name: str # name of the project
+    name: str  # name of the project
 
     def __init__(self, path: Path):
         """Initialize the FileManager with an empty dictionary of files
@@ -24,7 +28,7 @@ class FileManager:
         self.absolute_path = absolute_path
 
     def num_files(self) -> int:
-        """Return the number of files in the FileManager's dictionary"""
+        """Return the number of files in the FileManager's dictionary."""
         return len(self.file_paths)
 
     def get_file(self, path_name: str) -> Optional[Path]:
@@ -35,9 +39,10 @@ class FileManager:
             return None
 
     def already_added(self, path_name: str) -> bool:
+        """Check if the file is already in the FileManager's dictionary."""
         return path_name in self.file_paths
 
-    def add(self, path: Path) -> Optional[Path]:
+    def add(self, path: Path, create_ok: bool = False) -> Optional[Path]:
         """Adds a new file to the FileManager's dictionary of files."""
         if self.already_added(str(path)):
             return None
@@ -46,20 +51,26 @@ class FileManager:
         valid = validate_file_path(absolute_file_path)
 
         if not valid:
-            return None
+            creatable = is_path_creatable(str(absolute_file_path))
+            if creatable and create_ok:
+                path.write_text("")
+            else:
+                return None
 
         self.file_paths[str(path)] = absolute_file_path
         return absolute_file_path
 
     def create(self, path_name: str, content: str) -> Optional[Path]:
+        """Create a new file with the provided content and add it to the
+        FileManager's dictionary of files.
+        """
         path = Path(path_name)
-        file = self.add(path)
+        file = self.add(path, create_ok=True)
 
         if not file:
             return None
 
-        with file.open("w") as f:
-            f.write(content)
+        file.write_text(content)
 
         return file
 
@@ -69,10 +80,9 @@ class FileManager:
         if not file:
             return None
 
-        with file.open("r+") as f:
-            content = file.read_text()
-            patched = apply_diff_patch(content, patch)
-            f.write(patched)
+        content = file.read_text()
+        patched_content = apply_diff_patch(content, patch)
+        file.write_text(patched_content)
 
         return file
 
@@ -86,16 +96,16 @@ class FileManager:
             self.file_paths.pop(path_name, None)
 
     def _read_with_line_numbers(self, path_name: str, file: Path) -> str:
-        with file.open("r") as f:
-            lines = f.readlines()
+        """Return the content of the file with line numbers prepended to each line."""
+        lines = file.read_text().splitlines()
 
-            file_string = f"-- {path_name}\n"
-            line_number = 1
-            for line in lines:
-                file_string += f"{line_number}: {line}"
-                line_number += 1
+        file_string = f"-- {path_name}\n"
+        line_number = 1
+        for line in lines:
+            file_string += f"{line_number}: {line}"
+            line_number += 1
 
-            return file_string
+        return file_string
 
     def get_content(self, path_name: str) -> Optional[str]:
         """Return the content of the file at the given path with line numbers
