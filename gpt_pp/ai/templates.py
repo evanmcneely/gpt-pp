@@ -63,7 +63,7 @@ Example output:
 
 
 make_PR_review_notes = """
-Create review comments for this pull request given the details below.
+Create review comments for this pull request.
 
 {pr_details}
 
