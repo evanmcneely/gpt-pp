@@ -1,4 +1,8 @@
+from pathlib import Path
+from typing import List, Optional
+
 import typer
+from typing_extensions import Annotated
 
 from gpt_pp.ui import UI
 
@@ -16,23 +20,35 @@ app = typer.Typer()
 
 @app.command()
 def setup(
-    ignore_workspace: bool = typer.Option(
-        False,
-        "--no-workspace",
-        help="ignore existing project/file paths and prompts in the workspace directory if they exist",  # noqa
-    ),
-    ignore_imports: bool = typer.Option(
-        False,
-        "--no-imports",
-        help="do not load any files from file imports into context",
-    ),
+    project: Annotated[
+        Path,
+        typer.Argument(
+            help="Path to the project directory to work with",
+            exists=True,
+            file_okay=False,
+            dir_okay=True,
+            writable=True,
+            readable=True,
+            resolve_path=False,
+        ),
+    ],
+    # files: Annotated[
+    #     Optional[List[Path]],
+    #     typer.Argument(help="File paths from the project root directory"),
+    # ] = None,
+    imports: Annotated[
+        bool,
+        typer.Option(
+            help="Load any relevant files into context",
+        ),
+    ] = True,
 ):
     try:
-        system = initialize(ignore_workspace)
+        system = initialize(str(project))
 
-        if not ignore_imports:
+        if imports:
             retrieve_files(system)
-        build_initial_prompt(system, ignore_workspace)
+        build_initial_prompt(system)
 
         while True:
             clarify_instructions(system)

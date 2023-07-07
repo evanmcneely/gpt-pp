@@ -1,8 +1,9 @@
-from typing import Optional
+from pathlib import Path
+from typing import List, Optional
 
 from ..ai import AI
 from ..file_manager import FileManager
-from ..system import DB, System
+from ..system import System
 from ..ui import UI
 
 from ..file_utils import (  # isort:skip
@@ -15,48 +16,20 @@ from ..file_utils import (  # isort:skip
 )
 
 
-def _get_project_from_workspace(workspace: DB) -> Optional[str]:
-    """Get the project path from the workspace directory, validate the
-    path and return it. Return none if an error occurs while retrieving the
-    file or validating the path.
-    """
+def _check_if_project_is_valid(project: str) -> bool:
     try:
-        project = sanitize_input(workspace["project"])
-        if not project:
-            return None
-
-        abs_path = resolve_path(project)
-        validate_directory_path(abs_path)
-
-    except ValidationError:
-        UI.error("Cannot use workspace project path")
-        project = None
-    except FileNotFoundError:
-        project = None
-
-    return project
+        validate_directory_path(project)
+        return True
+    except ValidationError or FileNotFoundError:
+        return False
 
 
-def _get_file_from_workspace(workspace: DB, project: str) -> Optional[str]:
-    """Get the file path from the workspace directory, validate the
-    path and return it. Return none if an error occurs while retrieving the
-    file or validating the path.
-    """
-    try:
-        file = sanitize_input(workspace["file"])
-        if not file:
-            return None
-
-        abs_path = resolve_path(project, file)
-        validate_file_path(abs_path)
-
-    except ValidationError:
-        UI.error("Cannot use workspace file path")
-        file = None
-    except FileNotFoundError:
-        file = None
-
-    return file
+# def _check_if_path_is_valid(file: str) -> bool:
+#     try:
+#         validate_file_path(file)
+#         return True
+#     except ValidationError or FileNotFoundError:
+#         return False
 
 
 def _get_project_input() -> str:
@@ -103,37 +76,30 @@ def _get_file_input(project: str) -> str:
     return file
 
 
-def initialize(ignore_workspace: bool) -> System:
+def initialize(project_path: str) -> System:
     """Initialize the System class that the application is
     dependent on and return it.
     """
-    workspace = DB(resolve_path("workspace"))
-    ai = AI()
+    project_path = str(project_path)
+    project_valid = _check_if_project_is_valid(project_path)
 
-    project = _get_project_from_workspace(workspace)
-    if not project or ignore_workspace:
-        project = _get_project_input()
+    if not project_valid:
+        UI.message(f"{project_path} not valid")
+        project_path = _get_project_input()
     else:
-        UI.message(f"Using project {project}")
+        UI.message(f"Using project {project_path}")
 
-    directory_empty = is_directory_empty(resolve_path(project))
+    directory_empty = is_directory_empty(resolve_path(project_path))
 
-    file = None
     if not directory_empty:
-        file = _get_file_from_workspace(workspace, project)
-        if not file or ignore_workspace:
-            file = _get_file_input(project)
-        else:
-            UI.message(f"Using file {file}")
+        file = _get_file_input(project_path)
 
-    project = FileManager(project)
-    if file:
-        project.add(file)
+    project = FileManager(project_path)
+    project.add(file)  # type:ignore
 
     system = System(
-        workspace=workspace,
         project=project,
-        ai=ai,
+        ai=AI(),
     )
 
     return system
