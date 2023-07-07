@@ -4,7 +4,6 @@ from typing import Dict, Optional
 
 from gpt_pp.file_utils import (  # isort:skip
     apply_diff_patch,
-    is_path_creatable,
     validate_file_path,
 )
 
@@ -51,9 +50,8 @@ class FileManager:
         valid = validate_file_path(absolute_file_path)
 
         if not valid:
-            creatable = is_path_creatable(str(absolute_file_path))
-            if creatable and create_ok:
-                path.write_text("")
+            if create_ok:
+                absolute_file_path.write_text("")
             else:
                 return None
 
@@ -65,14 +63,14 @@ class FileManager:
         FileManager's dictionary of files.
         """
         path = Path(path_name)
-        file = self.add(path, create_ok=True)
+        absolute_file = self.add(path, create_ok=True)
 
-        if not file:
+        if not absolute_file:
             return None
 
-        file.write_text(content)
+        absolute_file.write_text(content)
 
-        return file
+        return absolute_file
 
     def apply_patch(self, path_name: str, patch: str) -> Optional[Path]:
         """Apply the diff patch to the file system."""

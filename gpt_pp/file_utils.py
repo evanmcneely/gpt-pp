@@ -106,16 +106,6 @@ def _is_pathname_valid(path: str) -> bool:
 
 
 @with_permissions
-def is_path_creatable(pathname: str) -> bool:
-    """
-    `True` if the current user has sufficient permissions to create the passed
-    pathname; `False` otherwise.
-    """
-    dirname = os.path.dirname(pathname) or os.getcwd()
-    return os.access(dirname, os.W_OK)
-
-
-@with_permissions
 def _path_exists(path: Path) -> bool:
     """`True` if the given path exists; `False` otherwise."""
     try:
