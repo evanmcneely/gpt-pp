@@ -54,11 +54,9 @@ def _format_PR_details(pull_request: dict) -> str:
     body = pull_request["body"]
     author_login = pull_request["author"]["login"]
     title = pull_request["title"]
-    url = pull_request["url"]
 
     formatted_data = f"Pull Request #{number}: {title}\n"
     formatted_data += f"Author: {author_login}\n"
-    formatted_data += f"URL: {url}\n"
     formatted_data += f"Body: {body}\n"
 
     return formatted_data

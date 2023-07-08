@@ -94,7 +94,8 @@ class AI(BaseChatMessageHistory):
             self.streaming_llm, prompt, pr_details=details, pr_diff=diff, user=user
         )
         return completion
-
+    
+    Halo(text="Generating request body", spinner="dots")
     def generate_pr_post_request_body(self, details: str, review_notes: str) -> str:
         prompt = PromptTemplate.from_template(templates.format_review_post_request)
         completion = self._run(
