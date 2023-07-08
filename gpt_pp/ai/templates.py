@@ -4,6 +4,7 @@ Chat History:
 {chat_history}
 """  # noqa
 
+
 generate_all_code = """Write the code that meets the instructions. 
 
 Start by thinking about how you are going to implement the code. Document your thoughts.
@@ -13,10 +14,12 @@ Then write the code needed for each file. Please note that the code should be fu
 Be consise, only write the code that is required to implement the changes. 
 """  # noqa
 
+
 diff = """Generate the universal diff that would need to be applied the file at path "{file_path}" to create the changes outlined in the chat history below.
 
 {chat_history}
 """  # noqa
+
 
 file_content = """{chat_history}
 ---
@@ -34,6 +37,7 @@ If there are no files imported into the file below, return the string 'nothing t
 
 {file}
 """  # noqa
+
 
 files_requiring_changes = """Return a list of file paths matched with the operation ("create", "patch" or "delete") that should be applied to the file to implement the instructions.
 
@@ -85,6 +89,7 @@ Overall: Overall thoughts about the changes being proposed and the PR review. Si
 Decision: decision to approve, request changes or comment.  You can only comment if the PR was authored by {user}.
 
 Begin!"""  # noqa
+
 
 format_review_post_request = """Generate the request body to POST the pull request review notes to github. Format your response as a JSON blob.
 

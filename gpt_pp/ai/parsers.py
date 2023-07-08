@@ -32,6 +32,7 @@ def extract_code_block(code_block: str) -> str:
         return code_block
 
 
+
 def extract_files(content: str) -> Optional[List[str]]:
     """Parse an AI models completion string into either a list of
     strings, split on the occurrence of a comma, or None if the
