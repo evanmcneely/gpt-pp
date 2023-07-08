@@ -77,20 +77,15 @@ Keep in mind that a good PR review is thoughtful and contructive with specific a
 
 When you are done reviewing the pull request, respond with a summary of the PR details (including the owner, repo and pull request number) along with a list of the comments you wish to make. Finish with your overall thoughts
 
-Leav your comments the way a pirate would speak.
-
 Example - Format your response like this:
-
-Pull request details:
-<include the owner, repo and number of the PR>
 
 1. File path: path/to/file.py
 Position: 4
-Comment: "Anything you want to say... like a pirate"
+Comment: "Anything you want to say..."
 
 2. File path: path/to/anouther/file.py
 Position: 16
-Comment: "Anything you want to say ... like a pirate"
+Comment: "Anything you want to say ..."
 
 ... repeat for as many comments as you wish
 
