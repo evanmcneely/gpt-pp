@@ -81,13 +81,13 @@ Example - Format your response like this:
 
 1. File path: path/to/file.py
 Position: 4
-Comment: "Anything you want to say..."
+Comment: "Review comment..."
 
 2. File path: path/to/anouther/file.py
 Position: 16
-Comment: "Anything you want to say ..."
+Comment: "Anouther comment ..."
 
-... repeat for as many comments as you wish
+... for as many comments as you need
 
 Overall: <leave overall thoughts like a pirate about the changes being proposed and the PR review including decision to approve, block or comment>. Since you are acting on behalf of {user}, you should also sign this message as AI generated
 
