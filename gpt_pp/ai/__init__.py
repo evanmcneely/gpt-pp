@@ -98,22 +98,18 @@ class AI(BaseChatMessageHistory):
         return completion
 
     @Halo(text="Generating request body to POST", spinner="dots")
-    def generate_pr_post_request_body(self, details: str, review_notes: str) -> dict:
+    def generate_pr_post_request_body(
+        self, details: str, user: str, review_notes: str
+    ) -> dict:
         prompt = PromptTemplate.from_template(templates.format_review_post_request)
         completion = self._run(
             self.interpret_llm,
             prompt,
             pr_details=details,
+            user=user,
             review_notes=review_notes,
         )
         request_body = parsers.extract_code_block(completion)
-        print()
-        print(request_body)
-        if not request_body:
-            raise Exception("Could not parse request body")
-
-        print("\n\n" + request_body)
-
         return json.loads(request_body)
 
     def load_messages_as_string(self) -> str:

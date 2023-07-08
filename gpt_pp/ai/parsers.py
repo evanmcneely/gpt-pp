@@ -22,14 +22,14 @@ def extract_file_operations(content: str) -> Optional[List[Tuple[str, str]]]:
     return output
 
 
-def extract_code_block(code_block: str) -> Optional[str]:
+def extract_code_block(code_block: str) -> str:
     """Parse the code block for the file content."""
     pattern = r"```(\w+)\s+(.*?)\s+```"
     match = re.search(pattern, code_block, re.DOTALL)
     if match:
         return match.group(2)
     else:
-        return None
+        return code_block
 
 
 def extract_files(content: str) -> Optional[List[str]]:

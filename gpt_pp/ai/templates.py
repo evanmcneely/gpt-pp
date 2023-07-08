@@ -64,64 +64,48 @@ PR diff:
 {pr_diff}
 
 Notes about reviewing a PR:
-Leave comments for specific positions in the diff when you have something constructive to say. Don't point out the obvious. Lean towards being mildly critical as you have high standards.
+Leave comments for specific positions in the diff when you have something constructive to say. Be critical as you have high standards. Don't point out the obvious. 
 
 The position value equals the number of lines down from the first "@@" hunk header in the file you want to add a comment. The line just below the "@@" line is position 1, the next line is position 2, and so on. The position in the diff continues to increase through lines of whitespace and additional hunks until the beginning of a new file. You cannot leave a comment on a position that is unchanged.
 
 Keep in mind that a good PR review is thoughtful and contructive with specific and actionable feedback on the changes. Include your overall thoughts on the pull request along with whether or not the PR should be approved, blocked or commented on at the end.
-    1. Approve (APRROVE) if everything looks good and you have only minor suggestions about the code.
-    2. Block (REQUEST_CHANGES) if there there are errors or bugs in the code.
-    3. Comment (COMMENT) if the code contains no bugs or errors but there are things that could be improved before approval. If the PR was opened by {user}, you can only Comment, not Approve or Block
-
-When you are done reviewing the pull request with a list of the comments you wish to make. Finish with your overall thoughts
+    1. Approve (APRROVE) if everything looks good and you have only minor suggestions about the code. You cannot approve if the PR was authored by {user}.
+    2. Request changes (REQUEST_CHANGES) if there there are errors or bugs in the code.
+    3. Comment (COMMENT) if the code contains no bugs or errors but there are things that could be improved before approval. You can only comment if the PR was authored by {user}.
 
 Format your response like this:
-
 1. File path: path/to/file.py
 Position: 4
-Comment: "Review comment..."
-
+Comment: "Contructive comment..."
 2. File path: path/to/anouther/file.py
 Position: 16
-Comment: "Anouther comment ..."
-
-... for as many comments as needed (comments should not be repetitive)
-
-Overall: Overall thoughts about the changes being proposed and the PR review including decision to approve, block or comment. Since you are acting on behalf of {user}, you should also sign this message as AI generated.
+Comment: "Anouther contructive comment ..."
+... for as many comments as needed
+Overall: Overall thoughts about the changes being proposed and the PR review. Since you are acting on behalf of {user}, you should also sign this message as "AI GENERATED".
+Decision: decision to approve, request changes or comment.  You can only comment if the PR was authored by {user}.
 
 Begin!"""  # noqa
 
 format_review_post_request = """Generate the request body to POST the pull request review notes to github. Format your response as a JSON blob.
-
-API Docs:
-**Create a Review Comment for a Pull Request**: 
-Add a review comment[s] for a pull request
-POST https://api.github.com/repos/OWNER/REPO/pulls/PULL_NUMBER/reviews
-Path parameters:
-- *owner*: string, Required
-The account owner of the repository. The name is not case sensitive.
-- *repo*: string, Required
-The name of the repository. The name is not case sensitive.
-- *pull_number*: integer, Required
-The number that identifies the pull request.
-Body parameters:
-- *body*: string, Required
-The body text of the pull request review. Put overall thoughts here.
-- *event*: string, Required
-The review action you want to perform. The review actions include: APPROVE, REQUEST_CHANGES, or COMMENT. Can be one of: APPROVE, REQUEST_CHANGES, COMMENT
-- *comments*: array of objects
-    - body: string, Required
-    Text of the review comment.
-    - path: string, Required
-    The relative path to the file that necessitates a comment. This should not start with a slash.
-    - position: integer
-    The position in the diff where you want to add a review comment. The position value equals the number of lines down from the first "@@" hunk header in the file you want to add a comment. The line just below the "@@" line is position 1, the next line is position 2, and so on. The position in the diff continues to increase through lines of whitespace and additional hunks until the beginning of a new file.
 
 PR details:
 {pr_details}
 
 {review_notes}
 
-Remember to format your response as a JSON blob.
+Body Parameters
+- *body*: string, Required
+The body text of the pull request review. Put overall thoughts here.
+- *event*: string, Required
+The review action you want to perform. Must be `COMMENT` if the pull request was authored by {user}. The review actions include: `APPROVE`, `REQUEST_CHANGES`, or `COMMENT`.
+- *comments*: array of objects
+    - `body`: string, Required
+    Text of the review comment.
+    - `path`: string, Required
+    The relative path to the file that necessitates a comment. This should not start with a slash.
+    - position: integer
+    The position in the diff where you want to add a review comment. The position value equals the number of lines down from the first "@@" hunk header in the file you want to add a comment. The line just below the "@@" line is position 1, the next line is position 2, and so on. The position in the diff continues to increase through lines of whitespace and additional hunks until the beginning of a new file.
+
+Remember to format your response as a JSON blob. If the pull request was authored by {user}, only `"event":"COMMENT"` can be made.
 
 Request body:"""  # noqa

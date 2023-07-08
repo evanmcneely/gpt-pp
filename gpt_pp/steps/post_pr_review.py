@@ -12,7 +12,7 @@ GITHUB_HEADERS = {
 
 
 def _format_pr_url(owner: str, repo: str, number: int) -> str:
-    return f"https://api.github.com/repos/{owner}/{repo}/pulls/{number}/comments"
+    return f"https://api.github.com/repos/{owner}/{repo}/pulls/{number}/reviews"
 
 
 def _post_review(owner: str, repo: str, number: int, body: dict):
@@ -26,7 +26,7 @@ def _post_review(owner: str, repo: str, number: int, body: dict):
     else:
         raise Exception(
             "Post failed by returning code of {} - {}. {}".format(
-                response.status_code,response, _format_pr_url(owner, repo, number)
+                response.status_code, response.text, _format_pr_url(owner, repo, number)
             )
         )
 

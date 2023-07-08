@@ -45,7 +45,7 @@ def setup(
         user, details, diff = _fetch_github_data(org, repo, pr_number)
 
         review_notes = ai.generate_review_notes(details, diff, user)
-        request_body = ai.generate_pr_post_request_body(details, review_notes)
+        request_body = ai.generate_pr_post_request_body(details, user, review_notes)
 
         post_pr_review(org, repo, pr_number, request_body)
 
