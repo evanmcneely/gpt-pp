@@ -88,15 +88,16 @@ class AI(BaseChatMessageHistory):
             verbose=VERBOSE,
             memory=memory,
         )
-    Halo(text="Generating review comments", spinner="dots")
+
+    @Halo(text="Generating review comments", spinner="dots")
     def generate_review_notes(self, details: str, diff: str, user: str) -> str:
         prompt = PromptTemplate.from_template(templates.create_review_notes)
         completion = self._run(
-            self.streaming_llm, prompt, pr_details=details, pr_diff=diff, user=user
+            self.code_llm, prompt, pr_details=details, pr_diff=diff, user=user
         )
         return completion
 
-    Halo(text="Generating request body to post", spinner="dots")
+    @Halo(text="Generating request body to post", spinner="dots")
     def generate_pr_post_request_body(self, details: str, review_notes: str) -> dict:
         prompt = PromptTemplate.from_template(templates.format_review_post_request)
         completion = self._run(
@@ -105,7 +106,13 @@ class AI(BaseChatMessageHistory):
             pr_details=details,
             review_notes=review_notes,
         )
-        return json.loads(completion)
+        request_body = parsers.extract_code_block(completion)
+        if not request_body:
+            raise Exception("Could not parse request body")
+
+        print("\n\n" + request_body)
+
+        return json.loads(request_body)
 
     def load_messages_as_string(self) -> str:
         """Convert chat messages to a string and return it."""

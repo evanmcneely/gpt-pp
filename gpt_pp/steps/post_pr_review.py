@@ -12,7 +12,7 @@ GITHUB_HEADERS = {
 
 
 def _format_pr_url(owner: str, repo: str, number: int) -> str:
-    return f"https://api.github.com/repos/repos/{owner}/{repo}/pulls/{number}/comments"
+    return f"https://api.github.com/repos/{owner}/{repo}/pulls/{number}/comments"
 
 
 def _post_review(owner: str, repo: str, number: int, body: dict):
