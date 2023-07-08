@@ -1,7 +1,8 @@
+import json
 from typing import Any, List, Optional, Tuple, Union
 
 from halo import Halo
-from langchain import LLMChain, PromptTemplate, SequentialChain
+from langchain import LLMChain, PromptTemplate
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.chains import ConversationChain
 from langchain.chat_models.base import BaseChatModel
@@ -87,16 +88,16 @@ class AI(BaseChatMessageHistory):
             verbose=VERBOSE,
             memory=memory,
         )
-
+    Halo(text="Generating review comments", spinner="dots")
     def generate_review_notes(self, details: str, diff: str, user: str) -> str:
         prompt = PromptTemplate.from_template(templates.create_review_notes)
         completion = self._run(
             self.streaming_llm, prompt, pr_details=details, pr_diff=diff, user=user
         )
         return completion
-    
-    Halo(text="Generating request body", spinner="dots")
-    def generate_pr_post_request_body(self, details: str, review_notes: str) -> str:
+
+    Halo(text="Generating request body to post", spinner="dots")
+    def generate_pr_post_request_body(self, details: str, review_notes: str) -> dict:
         prompt = PromptTemplate.from_template(templates.format_review_post_request)
         completion = self._run(
             self.interpret_llm,
@@ -104,7 +105,7 @@ class AI(BaseChatMessageHistory):
             pr_details=details,
             review_notes=review_notes,
         )
-        return completion
+        return json.loads(completion)
 
     def load_messages_as_string(self) -> str:
         """Convert chat messages to a string and return it."""

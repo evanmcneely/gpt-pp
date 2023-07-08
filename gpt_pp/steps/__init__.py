@@ -5,3 +5,5 @@ from .provide_feedback import provide_feedback
 from .retrieve_files import retrieve_files
 from .write_code_to_files import write_code_to_files
 from .get_pr_details import get_pr_details
+from .get_authenticated_user import get_authenticated_user
+from .post_pr_review import post_pr_review

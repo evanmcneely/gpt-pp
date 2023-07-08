@@ -4,13 +4,12 @@ from halo import Halo
 from config import GITHUB_ACCESS_TOKEN
 
 GITHUB_HEADERS = {
-    "Accept: application/vnd.github+json"
+    "Accept": "application/vnd.github+json",
     "Authorization": f"Bearer {GITHUB_ACCESS_TOKEN}",
     "X-GitHub-Api-Version": "2022-11-28",
 }
 
 
-Halo(text="Checking authenticated user", spinner="dots")
 def get_authenticated_user():
     response = requests.get(
         "https://api.github.com/user",

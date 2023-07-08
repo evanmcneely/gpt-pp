@@ -5,7 +5,7 @@ import requests
 from config import GITHUB_ACCESS_TOKEN
 
 GITHUB_HEADERS = {
-    "Accept: application/vnd.github+json"
+    "Accept": "application/vnd.github+json",
     "Authorization": f"Bearer {GITHUB_ACCESS_TOKEN}",
     "X-GitHub-Api-Version": "2022-11-28",
 }

@@ -4,7 +4,7 @@ from halo import Halo
 from config import GITHUB_ACCESS_TOKEN
 
 GITHUB_HEADERS = {
-    "Accept: application/vnd.github+json"
+    "Accept": "application/vnd.github+json",
     "Authorization": f"Bearer {GITHUB_ACCESS_TOKEN}",
     "X-GitHub-Api-Version": "2022-11-28",
 }
@@ -16,7 +16,7 @@ GITHUB_DIFF_HEADERS = {
 
 
 def _format_pr_url(owner: str, repo: str, number: int) -> str:
-    return f"https://api.github.com/{owner}/{repo}/pulls/{number}"
+    return f"https://api.github.com/repos/{owner}/{repo}/pulls/{number}"
 
 
 def _run_details_query(owner: str, repo: str, number: int) -> dict:
@@ -52,7 +52,7 @@ def _run_diff_query(owner: str, repo: str, number: int) -> str:
 def _format_PR_details(pull_request: dict) -> str:
     number = pull_request["number"]
     body = pull_request["body"]
-    author_login = pull_request["author"]["login"]
+    author_login = pull_request["user"]["login"]
     title = pull_request["title"]
 
     formatted_data = f"Pull Request #{number}: {title}\n"
@@ -62,8 +62,7 @@ def _format_PR_details(pull_request: dict) -> str:
     return formatted_data
 
 
-@Halo(text="Retrieveing PR details from Github", spinner="dots")
-def get_pr_details(owner: str, repo: str, number: int) -> tuple(str, str):
+def get_pr_details(owner: str, repo: str, number: int) -> tuple[str, str]:
     pull_request_details = _run_details_query(owner, repo, number)
     pull_request_diff = _run_diff_query(owner, repo, number)
 
