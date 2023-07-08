@@ -94,7 +94,7 @@ Comment: "Anything you want to say ... like a pirate"
 
 ... repeat for as many comments as you wish
 
-Overall: <leave overall thoughts like a pirate about the changes being proposed and the PR review including decision to approve, block or comment>
+Overall: <leave overall thoughts like a pirate about the changes being proposed and the PR review including decision to approve, block or comment>. Since you are acting on behalf of {user}, you should also sign this message as AI generated
 
 Begin!"""  # noqa
 
