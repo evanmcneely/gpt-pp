@@ -35,7 +35,9 @@ def setup(
         print(user)
 
         details, diff = get_pr_details(org, repo, pr_number)
+        print(details, diff)
         review_notes = ai.generate_review_notes(details, diff, user)
+        print(review_notes)
         request_body = ai.generate_pr_post_request_body(details, review_notes)
         post_pr_review(org, repo, pr_number, request_body)
 
