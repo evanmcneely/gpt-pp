@@ -26,7 +26,7 @@ def _post_review(owner: str, repo: str, number: int, body: dict):
     else:
         raise Exception(
             "Post failed by returning code of {} - {}. {}".format(
-                response.status_code, response.message, _format_pr_url(owner, repo, number)
+                response.status_code,response, _format_pr_url(owner, repo, number)
             )
         )
 

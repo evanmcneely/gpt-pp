@@ -107,6 +107,8 @@ class AI(BaseChatMessageHistory):
             review_notes=review_notes,
         )
         request_body = parsers.extract_code_block(completion)
+        print()
+        print(request_body)
         if not request_body:
             raise Exception("Could not parse request body")
 

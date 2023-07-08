@@ -1,4 +1,7 @@
+from typing import Tuple
+
 import typer
+from halo import Halo
 from typing_extensions import Annotated
 
 from gpt_pp.ai import AI
@@ -6,6 +9,13 @@ from gpt_pp.steps import get_authenticated_user, get_pr_details, post_pr_review
 from gpt_pp.ui import UI
 
 app = typer.Typer()
+
+
+@Halo(text="Retrieving github data", spinner="dots")
+def _fetch_github_data(org: str, repo: str, number: int) -> Tuple[str, str, str]:
+    user = get_authenticated_user()
+    details, diff = get_pr_details(org, repo, number)
+    return user, details, diff
 
 
 @app.command()
@@ -32,8 +42,8 @@ def setup(
     try:
         ai = AI()
 
-        user = get_authenticated_user()
-        details, diff = get_pr_details(org, repo, pr_number)
+        user, details, diff = _fetch_github_data(org, repo, pr_number)
+
         review_notes = ai.generate_review_notes(details, diff, user)
         request_body = ai.generate_pr_post_request_body(details, review_notes)
 

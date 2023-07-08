@@ -63,8 +63,6 @@ create_review_notes = """Create review comments for this pull request. You are r
 PR diff:
 {pr_diff}
 
---------
-
 Notes about reviewing a PR:
 Leave comments for specific positions in the diff when you have something constructive to say. Don't point out the obvious. Lean towards being mildly critical as you have high standards.
 
@@ -75,9 +73,9 @@ Keep in mind that a good PR review is thoughtful and contructive with specific a
     2. Block (REQUEST_CHANGES) if there there are errors or bugs in the code.
     3. Comment (COMMENT) if the code contains no bugs or errors but there are things that could be improved before approval. If the PR was opened by {user}, you can only Comment, not Approve or Block
 
-When you are done reviewing the pull request, respond with a summary of the PR details (including the owner, repo and pull request number) along with a list of the comments you wish to make. Finish with your overall thoughts
+When you are done reviewing the pull request with a list of the comments you wish to make. Finish with your overall thoughts
 
-Example - Format your response like this:
+Format your response like this:
 
 1. File path: path/to/file.py
 Position: 4
@@ -87,13 +85,13 @@ Comment: "Review comment..."
 Position: 16
 Comment: "Anouther comment ..."
 
-... for as many comments as you need
+... for as many comments as needed (comments should not be repetitive)
 
-Overall: <leave overall thoughts like a pirate about the changes being proposed and the PR review including decision to approve, block or comment>. Since you are acting on behalf of {user}, you should also sign this message as AI generated
+Overall: Overall thoughts about the changes being proposed and the PR review including decision to approve, block or comment. Since you are acting on behalf of {user}, you should also sign this message as AI generated.
 
 Begin!"""  # noqa
 
-format_review_post_request = """Generate the request body to POST the pull request review to github. Format your response as a JSON blob.
+format_review_post_request = """Generate the request body to POST the pull request review notes to github. Format your response as a JSON blob.
 
 API Docs:
 **Create a Review Comment for a Pull Request**: 
@@ -108,11 +106,9 @@ The name of the repository. The name is not case sensitive.
 The number that identifies the pull request.
 Body parameters:
 - *body*: string, Required
-The body text of the pull request review
+The body text of the pull request review. Put overall thoughts here.
 - *event*: string, Required
 The review action you want to perform. The review actions include: APPROVE, REQUEST_CHANGES, or COMMENT. Can be one of: APPROVE, REQUEST_CHANGES, COMMENT
-- *commit_id*: string
-The SHA of the commit that needs a review. Not using the latest commit SHA may render your review comment outdated if a subsequent commit modifies the line you specify as the position. Defaults to the most recent commit in the pull request when you do not specify a value.
 - *comments*: array of objects
     - body: string, Required
     Text of the review comment.
@@ -120,14 +116,12 @@ The SHA of the commit that needs a review. Not using the latest commit SHA may r
     The relative path to the file that necessitates a comment. This should not start with a slash.
     - position: integer
     The position in the diff where you want to add a review comment. The position value equals the number of lines down from the first "@@" hunk header in the file you want to add a comment. The line just below the "@@" line is position 1, the next line is position 2, and so on. The position in the diff continues to increase through lines of whitespace and additional hunks until the beginning of a new file.
-----
+
 PR details:
 {pr_details}
 
-Review Notes:
 {review_notes}
-----
 
 Remember to format your response as a JSON blob.
 
-API url and data:"""  # noqa
+Request body:"""  # noqa
