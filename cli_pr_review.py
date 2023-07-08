@@ -11,7 +11,7 @@ from gpt_pp.ui import UI
 app = typer.Typer()
 
 
-@Halo(text="Retrieving github data", spinner="dots")
+@Halo(text="Retrieving pull request data", spinner="dots")
 def _fetch_github_data(org: str, repo: str, number: int) -> Tuple[str, str, str]:
     user = get_authenticated_user()
     details, diff = get_pr_details(org, repo, number)

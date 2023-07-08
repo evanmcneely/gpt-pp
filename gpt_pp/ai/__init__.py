@@ -89,7 +89,7 @@ class AI(BaseChatMessageHistory):
             memory=memory,
         )
 
-    @Halo(text="Generating review comments", spinner="dots")
+    @Halo(text="Reviewing pull request", spinner="dots")
     def generate_review_notes(self, details: str, diff: str, user: str) -> str:
         prompt = PromptTemplate.from_template(templates.create_review_notes)
         completion = self._run(
@@ -97,7 +97,7 @@ class AI(BaseChatMessageHistory):
         )
         return completion
 
-    @Halo(text="Generating request body to post", spinner="dots")
+    @Halo(text="Generating request body to POST", spinner="dots")
     def generate_pr_post_request_body(self, details: str, review_notes: str) -> dict:
         prompt = PromptTemplate.from_template(templates.format_review_post_request)
         completion = self._run(
