@@ -2,7 +2,7 @@ import typer
 from typing_extensions import Annotated
 
 from gpt_pp.ai import AI
-from gpt_pp.steps import get_pr_details, post_pr_review
+from gpt_pp.steps import get_pr_details, post_pr_review, get_authenticated_user
 from gpt_pp.ui import UI
 
 app = typer.Typer()
@@ -31,8 +31,9 @@ def setup(
 ):
     try:
         ai = AI()
+        user = get_authenticated_user()
         details, diff = get_pr_details(org, repo, pr_number)
-        review_notes = ai.generate_review_notes(details, diff)
+        review_notes = ai.generate_review_notes(details, diff, user)
         request_body = ai.generate_pr_post_request_body(details, review_notes)
         post_pr_review(org, repo, pr_number, request_body)
 

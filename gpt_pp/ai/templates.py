@@ -56,7 +56,7 @@ Example output:
 """  # noqa
 
 
-create_review_notes = """Create review comments for this pull request.
+create_review_notes = """Create review comments for this pull request. You are reviewing this PR on behalf of {user}.
 
 {pr_details}
 
@@ -73,7 +73,7 @@ The position value equals the number of lines down from the first "@@" hunk head
 Keep in mind that a good PR review is thoughtful and contructive with specific and actionable feedback on the changes. Include your overall thoughts on the pull request along with whether or not the PR should be approved, blocked or commented on at the end.
     1. Approve (APRROVE) if everything looks good and you have only minor suggestions about the code.
     2. Block (REQUEST_CHANGES) if there there are errors or bugs in the code.
-    3. Comment (COMMENT) if the code contains no bugs or errors but there are things that could be improved before approval.
+    3. Comment (COMMENT) if the code contains no bugs or errors but there are things that could be improved before approval. If the PR was opened by {user}, you can only Comment, not Approve or Block
 
 When you are done reviewing the pull request, respond with a summary of the PR details (including the owner, repo and pull request number) along with a list of the comments you wish to make. Finish with your overall thoughts
 

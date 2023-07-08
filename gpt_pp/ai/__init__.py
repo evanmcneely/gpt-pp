@@ -88,10 +88,10 @@ class AI(BaseChatMessageHistory):
             memory=memory,
         )
 
-    def generate_review_notes(self, details: str, diff: str) -> str:
+    def generate_review_notes(self, details: str, diff: str, user: str) -> str:
         prompt = PromptTemplate.from_template(templates.create_review_notes)
         completion = self._run(
-            self.streaming_llm, prompt, pr_details=details, pr_diff=diff
+            self.streaming_llm, prompt, pr_details=details, pr_diff=diff, user=user
         )
         return completion
 
