@@ -4,18 +4,16 @@ from typing import Optional
 import typer
 from typing_extensions import Annotated
 
+from gpt_pp.steps import initialize, retrieve_files
 from gpt_pp.ui import UI
 
-from gpt_pp.steps import (  # isort:skip
-    build_initial_prompt,
-    clarify_instructions,
-    initialize,
-    provide_feedback,
-    retrieve_files,
-    write_code_to_files,
-)
-
 app = typer.Typer()
+
+
+def _is_exit(input: str):
+    if input.lower().strip() == "exit":
+        return True
+    return False
 
 
 @app.command()
@@ -28,7 +26,9 @@ def setup(
     ],
     file: Annotated[
         Optional[Path],
-        typer.Argument(help="File paths from the project root directory"),
+        typer.Argument(
+            help="File paths from the project root directory",
+        ),
     ] = None,
     imports: Annotated[
         bool,
@@ -42,12 +42,18 @@ def setup(
 
         if imports:
             retrieve_files(system)
-        build_initial_prompt(system)
+
+        file_content = system.project.get_all_file_content()
+        chat = system.ai.get_chat(file_content)
 
         while True:
-            clarify_instructions(system)
-            write_code_to_files(system)
-            provide_feedback(system)
+            question = UI.prompt("\nQuery")
+            if _is_exit(question):
+                break
+
+            print()  # linebreak
+            chat.predict(input=question)
+            print()  # linebreak
 
     except Exception as e:
         UI.error(str(e))

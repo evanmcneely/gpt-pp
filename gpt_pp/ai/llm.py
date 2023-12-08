@@ -1,21 +1,39 @@
-from langchain.chat_models import ChatOpenAI, ChatAnthropic
+from langchain.chat_models import ChatAnthropic, ChatOpenAI
 
-from config import OpenAIModels, AnthropicAIModels, OPENAI_API_KEY, ANTHROPIC_API_KEY
+from config import ( # isort:skip
+    ANTHROPIC_API_KEY, 
+    OPENAI_API_KEY, 
+    AnthropicAIModels,
+    OpenAIModels
+)
 
 
 def _get_openai(model: str, **kwargs):
+    """Return an instance of ChatOpenAI configured with the 
+    passed in keyword arguments.
+    """
     return ChatOpenAI(
-        openai_api_key=OPENAI_API_KEY, temperature=0, model_name=model, **kwargs
+        openai_api_key=OPENAI_API_KEY, 
+        temperature=0, 
+        model_name=model, 
+        **kwargs
     )
 
 
 def _get_anthropic(model: str, **kwargs):
+    """Return an instance of ChatAnthropic configured with the 
+    passed in keyword arguments.
+    """
     return ChatAnthropic(
-        anthropic_api_key=ANTHROPIC_API_KEY, temperature=0, model=model, **kwargs
+        anthropic_api_key=ANTHROPIC_API_KEY, 
+        temperature=0, 
+        model=model,
+        **kwargs
     )
 
 
 def get_llm(model: str, **kwargs):
+    """Return a language configured model instance for the passed in model name."""
     match model:
         case OpenAIModels.GPT_3_5_TURBO:
             return _get_openai(model, **kwargs)

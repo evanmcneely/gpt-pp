@@ -3,39 +3,21 @@ from ..ui import UI
 
 
 def _format_initial_prompt(prompt: str, file_content: str) -> str:
-    return f"""
-    Instructions: {prompt}
+    """Format the instructions and file content into a prompt."""
+    return f"""{prompt}
 
     {file_content}
     """
 
 
-def _get_prompt_from_workspace(system: System) -> str:
-    prompt = None
-    try:
-        prompt = system.workspace["prompt"]
-        if not prompt.strip():
-            return None
-    except Exception:
-        pass
-    # TODO: specific error messaging
-
-    return prompt
-
-
 def _get_prompt_from_input() -> str:
-    prompt = UI.prompt("Enter the instruction prompt that you want to execute")
-
-    return prompt
+    """Get the prompt instructions from the user and return it."""
+    return UI.prompt("Enter the instruction prompt that you want to execute")
 
 
 def build_initial_prompt(system: System):
-    prompt: str = _get_prompt_from_workspace(system)
-    if not prompt:
-        prompt = _get_prompt_from_input()
-
-    file_content: str = system.file_manager.get_all_file_content()
-
+    """Build the initial prompt from the workspace directory or user input."""
+    prompt = _get_prompt_from_input()
+    file_content = system.project.get_all_file_content()
     initial_prompt = _format_initial_prompt(prompt, file_content)
-
-    system.memory.add_user_message(initial_prompt)
+    system.ai.add_user_message(initial_prompt)
