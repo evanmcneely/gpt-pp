@@ -1,6 +1,6 @@
-# GPT Engineer - WIP
+# GPT Pair Programming - WIP
 
-Inspired and adapted from [AntonOsika/gpt/engineer](https://github.com/AntonOsika/gpt-engineer) with a focus on working with existing, large codebases. The current project looks nothing like the origional
+Inspired and adapted from [AntonOsika/gpt/engineer](https://github.com/AntonOsika/gpt-engineer) with a focus on working with existing, large codebases. The current project looks nothing like the origional.
 
 **Goal:**
 _Specify what you want to do and the place to do it, the AI asks for clarification, then makes the changes, and waits for feedback before continuing._
