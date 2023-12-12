@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # GPT Pair Programming - WIP
 
 Inspired and adapted from [AntonOsika/gpt/engineer](https://github.com/AntonOsika/gpt-engineer) with a focus on working with existing, large codebases. The current project looks nothing like the origional.
@@ -26,11 +25,6 @@ _Specify what you want to do and the place to do it, the AI asks for clarificati
 Add your own customized instructions in a `/preferences` directory. Add files by programming language name (ex: `javascript`, `python`, etc.) that will be used by the model to followyour best practices in the language. Create a file named `engineering` for general engineering best practices.
 
 To avoid entering the same instructions multiple times, create a `/workspace` directory with files `prompt`, `project` and `files` that the program will use by default to get things going.
-=======
-# GPT Pair Programming
-
-Inspired and adapted from [AntonOsika/gpt/engineer](https://github.com/AntonOsika/gpt-engineer) with a focus on working with existing, large codebases. The current project looks nothing like the origional so I renamed it to `gpt-pp` for "pair programming".
->>>>>>> 91a1c3e6f856ecf6320b8530a0e0da3196c64212
 
 ## Philosophy
 
